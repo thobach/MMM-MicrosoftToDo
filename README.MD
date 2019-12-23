@@ -9,26 +9,26 @@ The idea of this module is to display a shopping list on your mirror that you ca
 
 ## Preparation
 Register an app at https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps
-1. Click on "New registration"
+1. Click on "+ New registration"
 2. Enter as "Name": "Magic Mirror"
 3. Select as "Supported account types": "Accounts in any organizational directory (Any Azure AD directory - Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)"
-4. Select as "Platform configuration": "Client Application"
-5. Click "Register"
-6. Go to "Overview" and copy the "Application ID" (Client ID), e.g. "4ef19f40-4892-4905-b999-76041e991f53"
+4. Select as "Redirect URI": "Web"
+5. Set as "Redirect URI": "https://localhost:1234"
+6. Click "Register"
+7. Go to "Overview" and copy the "Application (client) ID" (Client ID), e.g. "4ef19f40-4892-4905-b999-76041e991f53"
 
 Generate a client secret key
-1. Go to "Authentication"
-2. Click on "Add a platform"
-3. Select "Web app"
-4. Set as "Redirect URI": "https://localhost:1234"
-5. Click "Configure"
-6. Go to "Certificates & secrets"
-7. Click "+ New client secret"
-8. Set as "Description": "Magic Mirror"
-9. Select as "Expires": "Never"
-10. Copy the "Value", e.g. "1Q25ls?TKEDf4RWBKVUbKjnaVu=ytP.[", it will be the client secret you need later
+1. Go to "Certificates & secrets"
+2. Click "+ New client secret"
+3. Set as "Description": "Magic Mirror"
+4. Select as "Expires": "Never"
+5. Click "Add"
+6. Copy the "Value", e.g. "1Q25ls?TKEDf4RWBKVUbKjnaVu=ytP.[", it will be the client secret you need later
 
-Create authorization code by opening in your browser "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access user.read tasks.read&redirect_uri=https://localhost:1234&response_mode=query&state=12345" (but replace the client_id with your value)
+Create authorization code by opening the following URL in your browser (but replace the client_id with your value):
+````
+https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access user.read tasks.read&redirect_uri=https://localhost:1234&response_mode=query&state=12345
+```` 
 1. Click on "Yes" and wait to be redirected
 2. Copy "code" parameter from the URL in the browser, e.g. "M30cd0dff-af91-d061-8755-ffb3b328aa03" from https://localhost:1234/?code=M30cd0dff-af91-d061-8755-ffb3b328aa03&state=12345
 
