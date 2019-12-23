@@ -47,7 +47,7 @@ curl -X POST \
 ````
 
 Identify ID of the task folder
-1. Go to https://to-do.microsoft.com/tasks/?fromOwa=true
+1. Go to https://to-do.microsoft.com/tasks/?fromOwa=true and sign-in if necessary
 2. Select your desired task list
 3. Copy the task list ID from the URL, e.g. "AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA=" from "https://to-do.microsoft.com/tasks/AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA="
 
