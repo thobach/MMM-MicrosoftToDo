@@ -38,7 +38,7 @@ https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=cod
 2. Copy the `code` parameter from the URL in the browser, e.g. `M30cd0dff-af91-d061-8755-ffb3b328aa03` from
 ```
 https://localhost:1234/?code=M30cd0dff-af91-d061-8755-ffb3b328aa03&state=12345
-``
+```
 
 ### Refresh Token Generation (Refresh Token)
 Generate refresh token to allow the module to retrieve your task list going forward
