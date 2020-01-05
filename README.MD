@@ -86,4 +86,13 @@ modules: [
 	},
 ]
 ```
-
+3. Disable CORS
+In order to load the Microsoft API from the browser without the need of a Node_Helper you will need to allow Electron to ignore the CORS rules. Add the following configuration to your `config/config.js` file, e.g. below the `modules` property..
+````javascript
+electronOptions: {
+    webPreferences: {
+        webSecurity: false
+    }
+}
+````
+See also https://forum.magicmirror.builders/topic/9222/mmm-nest-status-new-module-for-your-nest-thermostats-and-protect-smoke-detectors/23 for an example.
