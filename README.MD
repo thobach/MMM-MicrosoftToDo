@@ -73,19 +73,19 @@ https://to-do.microsoft.com/tasks/AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALg
 2. In order to load the MMM-MicrosoftToDo module you will need to add the following configuration to your `config/config.js` file. As `oauth2ClientSecret` you need to provide Client Secret from above, as `oauth2RefreshToken` you set the Refresh Token, as `oauth2ClientId` you set the Client ID and as `listId` you set the Task List ID from above.
 ```javascript
 modules: [
-	{
-		module: 'MMM-MicrosoftToDo',
-		position: 'top_left',	// This can be any of the regions. Best results in left or right regions.
-		header: 'Shopping List', // This is optional
-		config: {
-			oauth2ClientSecret: '1Q25ls%3FTKEDf4RWBKVUbKjnaVu%3DytP.%5B',
-			oauth2RefreshToken: 'MCVDmtyumC8ZdlGxrkMwCdur4FbPh7GHjy1gOaOHEA8*c5tTI4oIcJAHU8AflLZMLmcCRWNEa7nMkag2hbipYbZ3QgL9JB1G6Hc*JZY9oA5j46Cq79b6BDx8mivTVen0r*39h2hw9pngKS7MGXjKc9efwayQ7UhsFoCJ2wdhLJzv5gTR2EozgcsKsxHODj!1fV8a1sqVqJ!sU*CBLTMsm0twI2hZqsCkPoSWaMIS5kKFAq7bCsfNaumS11TZYni3XjVwuyHn4DEqfLGjHuSNo1TYRifcG422MdG6bYt7tBxWiw5dlq2iIEMl6O*N2sLWU7W0Ns2*oQbcXIFxRsZ8cHP*6M9dn*9Axg8WbtERj!*jHTfC!Ax6IILXrHDJkdAXgh01PVH!huztVrgd0UC6E4R4zJSOa4ytOKWfQcL9h0NdA',
-			oauth2ClientId: '4ef19f40-4892-4905-b999-76041e991f53',
-			listId: 'AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA=',
+  {
+    module: 'MMM-MicrosoftToDo',
+    position: 'top_left',	// This can be any of the regions. Best results in left or right regions.
+    header: 'Shopping List', // This is optional
+    config: {
+      oauth2ClientSecret: '1Q25ls%3FTKEDf4RWBKVUbKjnaVu%3DytP.%5B',
+      oauth2RefreshToken: 'MCVDmtyumC8ZdlGxrkMwCdur4FbPh7GHjy1gOaOHEA8*c5tTI4oIcJAHU8AflLZMLmcCRWNEa7nMkag2hbipYbZ3QgL9JB1G6Hc*JZY9oA5j46Cq79b6BDx8mivTVen0r*39h2hw9pngKS7MGXjKc9efwayQ7UhsFoCJ2wdhLJzv5gTR2EozgcsKsxHODj!1fV8a1sqVqJ!sU*CBLTMsm0twI2hZqsCkPoSWaMIS5kKFAq7bCsfNaumS11TZYni3XjVwuyHn4DEqfLGjHuSNo1TYRifcG422MdG6bYt7tBxWiw5dlq2iIEMl6O*N2sLWU7W0Ns2*oQbcXIFxRsZ8cHP*6M9dn*9Axg8WbtERj!*jHTfC!Ax6IILXrHDJkdAXgh01PVH!huztVrgd0UC6E4R4zJSOa4ytOKWfQcL9h0NdA',
+      oauth2ClientId: '4ef19f40-4892-4905-b999-76041e991f53',
+      listId: 'AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA=',
       showCheckbox: true, // default value to show a checkbox before each todo list item
       hideIfEmpty: false, // default value to show module also when the todo list is empty
-		}
-	},
+    }
+  },
 ]
 ```
 3. Disable CORS
