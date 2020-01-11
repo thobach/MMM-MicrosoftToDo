@@ -72,7 +72,7 @@ https://to-do.microsoft.com/tasks/AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALg
 
 ## Installation
 1. Navigate into your MagicMirror's `modules` folder and execute `git clone https://github.com/thobach/MMM-MicrosoftToDo.git`.
-2. In order to load the MMM-MicrosoftToDo module you will need to add the following configuration to your `config/config.js` file. As `oauth2ClientSecret` you need to provide Client Secret from above, as `oauth2RefreshToken` you set the Refresh Token, as `oauth2ClientId` you set the Client ID and as `listId` you set the Task List ID from above. If you omit the `listId` you can check the web console output which will contain a list of all task lists with their IDs.
+2. In order to load the MMM-MicrosoftToDo module you will need to add the following configuration to your `config/config.js` file. As `oauth2ClientSecret` you need to provide Client Secret from above, as `oauth2RefreshToken` you set the Refresh Token, as `oauth2ClientId` you set the Client ID and as `listId` you set the Task List ID from above. If you omit the `listId` the default task list will be used.
 ```javascript
 modules: [
   {
