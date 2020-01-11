@@ -9,7 +9,7 @@ Module.register("MMM-MicrosoftToDo",{
       // styled wrapper of the todo list
       var listWrapper = document.createElement("ul");
       // listWrapper.style.border = 'none';
-      // listWrapper.style.width = '100%';
+      listWrapper.style.maxWidth = this.config.maxWidth + 'px';
       listWrapper.style.paddingLeft = '0';
       listWrapper.style.marginTop = '0';
       listWrapper.style.listStyleType = 'none';
@@ -20,11 +20,11 @@ Module.register("MMM-MicrosoftToDo",{
 
       // for each entry add styled list items
       if (this.list.length != 0) {
-        this.list.forEach(element => listItemsText += "<li>" + checkbox + element.subject + "</li>");
+        this.list.forEach(element => listItemsText += "<li style=\"list-style-position:inside; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;\">" + checkbox + element.subject + "</li>");
       }
       // otherwise indicate that there are no list entries
       else {
-        listItemsText += "<li style=\"list-style-type:none\">" + this.translate("NO_ENTRIES") + "</li>";
+        listItemsText += "<li style=\"list-style-position:inside; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;\">" + this.translate("NO_ENTRIES") + "</li>";
       }
 
       // add list items to wrapper
@@ -53,6 +53,11 @@ Module.register("MMM-MicrosoftToDo",{
       // decide if a checkbox icon should be shown in front of each todo list item
       if(this.config.showCheckbox === undefined){
         this.config.showCheckbox = true;
+      }
+
+      // set default max module width
+      if(this.config.maxWidth === undefined){
+        this.config.maxWidth = '450px';
       }
 
       // copy module object to be accessible in callbacks
