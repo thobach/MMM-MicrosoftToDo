@@ -105,7 +105,7 @@ Module.register("MMM-MicrosoftToDo",{
       loadEntriesAndRefresh();
 
       // refresh the TODO list every 60s
-      setInterval(loadEntriesAndRefresh, 10000); //perform every 60 seconds.
+      setInterval(loadEntriesAndRefresh, 60000); //perform every 60 seconds.
     },
 
 });
