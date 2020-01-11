@@ -8,12 +8,10 @@ Module.register("MMM-MicrosoftToDo",{
 
       // styled wrapper of the todo list
       var listWrapper = document.createElement("ul");
-      // listWrapper.style.border = 'none';
       listWrapper.style.maxWidth = this.config.maxWidth + 'px';
       listWrapper.style.paddingLeft = '0';
       listWrapper.style.marginTop = '0';
       listWrapper.style.listStyleType = 'none';
-      //  style=\"list-style-type:none\"
       listWrapper.classList.add("small");
 
       var listItemsText = "";
@@ -76,34 +74,63 @@ Module.register("MMM-MicrosoftToDo",{
 
             accessToken = JSON.parse(this.responseText).access_token;
 
-            // Get task list
-            var xhttp = new XMLHttpRequest();
-            xhttp.open("GET", "https://graph.microsoft.com/beta/me/outlook/taskFolders/"+self.config.listId+"/tasks?$select=subject,status&$top=200&$filter=status%20ne%20%27completed%27", true);
-            xhttp.setRequestHeader("Authorization", "Bearer " + accessToken);
-            xhttp.send();
-            xhttp.onreadystatechange = function() {
+            // if list ID was provided, retrieve its tasks
+            if(self.config.listId !== undefined && self.config.listId != "") {
 
-              if (this.readyState == 4 && this.status == 200) {
+              // Get task list
+              var xhttp = new XMLHttpRequest();
+              xhttp.open("GET", "https://graph.microsoft.com/beta/me/outlook/taskFolders/"+self.config.listId+"/tasks?$select=subject,status&$top=200&$filter=status%20ne%20%27completed%27", true);
+              xhttp.setRequestHeader("Authorization", "Bearer " + accessToken);
+              xhttp.send();
+              xhttp.onreadystatechange = function() {
 
-                // parse response from Microsoft
-                var list = JSON.parse(this.responseText);
+                if (this.readyState == 4 && this.status == 200) {
 
-                // store todo list in module to be used during display (getDom function)
-                self.list = list.value;
+                  // parse response from Microsoft
+                  var list = JSON.parse(this.responseText);
 
-                self.updateDom();
+                  // store todo list in module to be used during display (getDom function)
+                  self.list = list.value;
 
-                if (config.hideIfEmpty) {
-                  self.list.value.length > 0 ? self.show() : self.hide();
-                }
+                  self.updateDom();
 
-              } // if readyState
+                  if (config.hideIfEmpty) {
+                    self.list.value.length > 0 ? self.show() : self.hide();
+                  }
 
-            } // function onreadystatechange
+                } // if readyState tasks
 
-          } // if readyState
+              } // function onreadystatechange tasks
 
-        }; // function onreadystatechange
+            }
+            // otherwise identify the list ID of the default task list first
+            else {
+
+              var xhttp = new XMLHttpRequest();
+              xhttp.open("GET", "https://graph.microsoft.com/beta/me/outlook/taskFolders/?$top=200", true);
+              xhttp.setRequestHeader("Authorization", "Bearer " + accessToken);
+              xhttp.send();
+              xhttp.onreadystatechange = function() {
+
+                if (this.readyState == 4 && this.status == 200) {
+
+                  // parse response from Microsoft
+                  var list = JSON.parse(this.responseText);
+
+                  // set listID to default task list "Tasks"
+                  list.value.forEach(element => element.isDefaultFolder ? self.config.listId = element.id : '' );
+
+                  // load this function again as the list ID is now known
+                  loadEntriesAndRefresh();
+
+                } // if readyState task list id
+
+              } // function onreadystatechange task list id
+
+          } // if readyState access token
+
+        }; // function onreadystatechange access token
+      }
 
       };
 
