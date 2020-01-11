@@ -83,6 +83,7 @@ modules: [
 			oauth2ClientId: '4ef19f40-4892-4905-b999-76041e991f53',
 			listId: 'AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA=',
       showCheckbox: true, // default value to show a checkbox before each todo list item
+      hideIfEmpty: false, // default value to show module also when the todo list is empty
 		}
 	},
 ]
