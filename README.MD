@@ -1,4 +1,4 @@
-# MMM-MicrosoftToDo 
+# MMM-MicrosoftToDo
 MMM-MicrosoftToDo is a 3rd party module for [MagicMirror](https://github.com/MichMich/MagicMirror) that shows open tasks from task lists. The tasks are retrieved from Microsoft To Do / Outlook.
 
 The idea of this module is to display a shopping list on your mirror that you can control from your Microsoft To Do app and collaborate on with your family. Originally I used [MMM-Wunderlist](https://github.com/paviro/MMM-Wunderlist), though Wunderlist will be shut down and replaced by Microsoft To Do.
@@ -82,6 +82,7 @@ modules: [
 			oauth2RefreshToken: 'MCVDmtyumC8ZdlGxrkMwCdur4FbPh7GHjy1gOaOHEA8*c5tTI4oIcJAHU8AflLZMLmcCRWNEa7nMkag2hbipYbZ3QgL9JB1G6Hc*JZY9oA5j46Cq79b6BDx8mivTVen0r*39h2hw9pngKS7MGXjKc9efwayQ7UhsFoCJ2wdhLJzv5gTR2EozgcsKsxHODj!1fV8a1sqVqJ!sU*CBLTMsm0twI2hZqsCkPoSWaMIS5kKFAq7bCsfNaumS11TZYni3XjVwuyHn4DEqfLGjHuSNo1TYRifcG422MdG6bYt7tBxWiw5dlq2iIEMl6O*N2sLWU7W0Ns2*oQbcXIFxRsZ8cHP*6M9dn*9Axg8WbtERj!*jHTfC!Ax6IILXrHDJkdAXgh01PVH!huztVrgd0UC6E4R4zJSOa4ytOKWfQcL9h0NdA',
 			oauth2ClientId: '4ef19f40-4892-4905-b999-76041e991f53',
 			listId: 'AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA=',
+      showCheckbox: true, // default value to show a checkbox before each todo list item
 		}
 	},
 ]
