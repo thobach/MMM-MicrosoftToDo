@@ -4,7 +4,7 @@ Module.register("MMM-MicrosoftToDo",{
     getDom: function() {
 
       // checkbox icon is added based on configuration
-      var checkbox = this.config.showCheckbox ? "▢&nbsp; " : "";
+      var checkbox = self.config.showCheckbox ? "▢&nbsp; " : "";
 
       // styled wrapper of the todo list
       var listWrapper = document.createElement("ul");
@@ -38,6 +38,31 @@ Module.register("MMM-MicrosoftToDo",{
       }
     },
 
+    socketNotificationReceived: function (notification, payload) {
+
+      if (notification === "DATA_FETCHED") {
+
+        this.list = payload;
+
+        // check if module should be hidden according to list size and the module's configuration
+        if (this.config.hideIfEmpty) {
+          if(this.list.length > 0) {
+            if(this.hidden){
+              this.show()
+            }
+          } else {
+            if(!this.hidden) {
+              console.log(this.name + ' hiding module according to \'hideIfEmpty\' configuration, since there are no tasks present in the list.');
+              this.hide()
+            }
+          }
+        }
+
+        this.updateDom();
+
+      }
+    },
+
     start: function() {
 
       // start with empty list that shows loading indicator
@@ -58,86 +83,21 @@ Module.register("MMM-MicrosoftToDo",{
         this.config.maxWidth = '450px';
       }
 
+      // set default limit for number of tasks to be shown
+      if(this.config.itemLimit === undefined){
+        this.config.itemLimit = '200';
+      }
+
       // copy module object to be accessible in callbacks
       var self = this;
 
-      var loadEntriesAndRefresh = function() {
-
-        // Generate access token from refresh token
-        var xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "https://login.microsoftonline.com/common/oauth2/v2.0/token", true);
-        xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhttp.send("grant_type=refresh_token&client_id="+self.config.oauth2ClientId+"&scope=user.read%20tasks.read&refresh_token="+self.config.oauth2RefreshToken+"&client_secret="+self.config.oauth2ClientSecret);
-        xhttp.onreadystatechange = function() {
-
-          if (this.readyState == 4 && this.status == 200) {
-
-            accessToken = JSON.parse(this.responseText).access_token;
-
-            // if list ID was provided, retrieve its tasks
-            if(self.config.listId !== undefined && self.config.listId != "") {
-
-              // Get task list
-              var xhttp = new XMLHttpRequest();
-              xhttp.open("GET", "https://graph.microsoft.com/beta/me/outlook/taskFolders/"+self.config.listId+"/tasks?$select=subject,status&$top=200&$filter=status%20ne%20%27completed%27", true);
-              xhttp.setRequestHeader("Authorization", "Bearer " + accessToken);
-              xhttp.send();
-              xhttp.onreadystatechange = function() {
-
-                if (this.readyState == 4 && this.status == 200) {
-
-                  // parse response from Microsoft
-                  var list = JSON.parse(this.responseText);
-
-                  // store todo list in module to be used during display (getDom function)
-                  self.list = list.value;
-
-                  self.updateDom();
-
-                  if (config.hideIfEmpty) {
-                    self.list.value.length > 0 ? self.show() : self.hide();
-                  }
-
-                } // if readyState tasks
-
-              } // function onreadystatechange tasks
-
-            }
-            // otherwise identify the list ID of the default task list first
-            else {
-
-              var xhttp = new XMLHttpRequest();
-              xhttp.open("GET", "https://graph.microsoft.com/beta/me/outlook/taskFolders/?$top=200", true);
-              xhttp.setRequestHeader("Authorization", "Bearer " + accessToken);
-              xhttp.send();
-              xhttp.onreadystatechange = function() {
-
-                if (this.readyState == 4 && this.status == 200) {
-
-                  // parse response from Microsoft
-                  var list = JSON.parse(this.responseText);
-
-                  // set listID to default task list "Tasks"
-                  list.value.forEach(element => element.isDefaultFolder ? self.config.listId = element.id : '' );
-
-                  // load this function again as the list ID is now known
-                  loadEntriesAndRefresh();
-
-                } // if readyState task list id
-
-              } // function onreadystatechange task list id
-
-          } // if readyState access token
-
-        }; // function onreadystatechange access token
+      // update tasks every 60s
+      var refreshFunction = function(){
+        self.sendSocketNotification("FETCH_DATA", self.config);
       }
+      refreshFunction();
+      setInterval(refreshFunction, 5000);
 
-      };
-
-      loadEntriesAndRefresh();
-
-      // refresh the TODO list every 60s
-      setInterval(loadEntriesAndRefresh, 60000); //perform every 60 seconds.
     },
 
 });

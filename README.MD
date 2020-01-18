@@ -87,17 +87,8 @@ modules: [
       showCheckbox: true, // optional parameter: default value is true and will show a checkbox before each todo list item
       hideIfEmpty: false, // optional parameter: default value is false and will show the module also when the todo list is empty
       maxWidth: 450, // optional parameter: max width in pixel, default value is 450
+      itemLimit: 200, // optional parameter: maximum number of tasks to be displayed, default value is 200
     }
   },
 ]
 ```
-3. Disable CORS
-In order to load the Microsoft API from the browser without the need of a Node_Helper you will need to allow Electron to ignore the CORS rules. Add the following configuration to your `config/config.js` file, e.g. below the `modules` property..
-````javascript
-electronOptions: {
-    webPreferences: {
-        webSecurity: false
-    }
-}
-````
-See also https://forum.magicmirror.builders/topic/9222/mmm-nest-status-new-module-for-your-nest-thermostats-and-protect-smoke-detectors/23 for an example.
