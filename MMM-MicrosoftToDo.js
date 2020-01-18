@@ -96,7 +96,7 @@ Module.register("MMM-MicrosoftToDo",{
         self.sendSocketNotification("FETCH_DATA", self.config);
       }
       refreshFunction();
-      setInterval(refreshFunction, 5000);
+      setInterval(refreshFunction, 60000);
 
     },
 

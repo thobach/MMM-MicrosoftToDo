@@ -87,7 +87,7 @@ modules: [
       showCheckbox: true, // optional parameter: default value is true and will show a checkbox before each todo list item
       hideIfEmpty: false, // optional parameter: default value is false and will show the module also when the todo list is empty
       maxWidth: 450, // optional parameter: max width in pixel, default value is 450
-      itemLimit: 200, // optional parameter: maximum number of tasks to be displayed, default value is 200
+      itemLimit: 200 // optional parameter: limit on the number of items to show from the list, default value is 200
     }
   },
 ]
