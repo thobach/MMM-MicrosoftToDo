@@ -90,7 +90,7 @@ module.exports = NodeHelper.create({
 
                       // send tasks to front-end
                       const tasksJson = JSON.parse(body);
-                      self.sendSocketNotification("DATA_FETCHED", tasksJson.value);
+                      self.sendSocketNotification("DATA_FETCHED_" + config.id, tasksJson.value);
 
                   });
                 };

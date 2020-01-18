@@ -4,7 +4,7 @@ Module.register("MMM-MicrosoftToDo",{
     getDom: function() {
 
       // checkbox icon is added based on configuration
-      var checkbox = self.config.showCheckbox ? "▢&nbsp; " : "";
+      var checkbox = this.config.showCheckbox ? "▢&nbsp; " : "";
 
       // styled wrapper of the todo list
       var listWrapper = document.createElement("ul");
@@ -40,7 +40,7 @@ Module.register("MMM-MicrosoftToDo",{
 
     socketNotificationReceived: function (notification, payload) {
 
-      if (notification === "DATA_FETCHED") {
+      if (notification === ("DATA_FETCHED_" + this.config.id)) {
 
         this.list = payload;
 
@@ -65,31 +65,34 @@ Module.register("MMM-MicrosoftToDo",{
 
     start: function() {
 
+      // copy module object to be accessible in callbacks
+      var self = this;
+
       // start with empty list that shows loading indicator
-      this.list = [ { subject: this.translate("LOADING_ENTRIES") } ];
+      self.list = [ { subject: this.translate("LOADING_ENTRIES") } ];
 
       // decide if a module should be shown if todo list is empty
-      if(this.config.hideIfEmpty === undefined){
-        this.config.hideIfEmpty = false;
+      if(self.config.hideIfEmpty === undefined){
+        self.config.hideIfEmpty = false;
       }
 
       // decide if a checkbox icon should be shown in front of each todo list item
-      if(this.config.showCheckbox === undefined){
-        this.config.showCheckbox = true;
+      if(self.config.showCheckbox === undefined){
+        self.config.showCheckbox = true;
       }
 
       // set default max module width
-      if(this.config.maxWidth === undefined){
-        this.config.maxWidth = '450px';
+      if(self.config.maxWidth === undefined){
+        self.config.maxWidth = '450px';
       }
 
       // set default limit for number of tasks to be shown
-      if(this.config.itemLimit === undefined){
-        this.config.itemLimit = '200';
+      if(self.config.itemLimit === undefined){
+        self.config.itemLimit = '200';
       }
 
-      // copy module object to be accessible in callbacks
-      var self = this;
+      // in case there are multiple instances of this module, ensure the responses from node_helper are mapped to the correct module
+      self.config.id = this.identifier;
 
       // update tasks every 60s
       var refreshFunction = function(){
