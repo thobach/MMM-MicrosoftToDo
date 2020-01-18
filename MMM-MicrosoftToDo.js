@@ -58,6 +58,11 @@ Module.register("MMM-MicrosoftToDo",{
         this.config.maxWidth = '450px';
       }
 
+      // set default item limit
+      if(!this.config.itemLimit){
+        this.config.itemLimit = 200;
+      }
+
       // copy module object to be accessible in callbacks
       var self = this;
 
@@ -79,7 +84,7 @@ Module.register("MMM-MicrosoftToDo",{
 
               // Get task list
               var xhttp = new XMLHttpRequest();
-              xhttp.open("GET", "https://graph.microsoft.com/beta/me/outlook/taskFolders/"+self.config.listId+"/tasks?$select=subject,status&$top=200&$filter=status%20ne%20%27completed%27", true);
+              xhttp.open("GET", "https://graph.microsoft.com/beta/me/outlook/taskFolders/"+self.config.listId+"/tasks?$select=subject,status&$top=" + self.config.itemLimit + "&$filter=status%20ne%20%27completed%27", true);
               xhttp.setRequestHeader("Authorization", "Bearer " + accessToken);
               xhttp.send();
               xhttp.onreadystatechange = function() {
