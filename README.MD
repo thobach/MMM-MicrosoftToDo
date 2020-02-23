@@ -32,7 +32,7 @@ Register an app at https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirec
 ### Authorization Code Generation (Code)
 Create authorization code by opening the following URL in your browser (but replace the client_id with your value):
 ```
-https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access user.read tasks.read&redirect_uri=https://localhost:1234&response_mode=query&state=12345
+https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access%20user.read%20tasks.read&redirect_uri=https://localhost:1234&response_mode=query&state=12345
 ```
 1. Click on "Yes" and wait to be redirected
 2. Copy the `code` parameter from the URL in the browser, e.g. `M30cd0dff-af91-d061-8755-ffb3b328aa03` from
