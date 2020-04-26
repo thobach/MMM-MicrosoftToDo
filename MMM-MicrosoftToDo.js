@@ -40,6 +40,17 @@ Module.register("MMM-MicrosoftToDo",{
 
     socketNotificationReceived: function (notification, payload) {
 
+      if (notification === ("FETCH_INFO_ERROR_" + this.config.id)) {
+
+        console.error('An error occurred while retrieving the todo list from Microsoft To Do. Please check the logs.');
+        console.error(payload.error);
+        console.error(payload.errorDescription);
+        this.list = [ { "subject": "Error occurred: " + payload.error + ". Check logs."} ];
+
+        this.updateDom();
+
+      }
+
       if (notification === ("DATA_FETCHED_" + this.config.id)) {
 
         this.list = payload;

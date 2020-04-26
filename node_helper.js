@@ -52,15 +52,14 @@ module.exports = NodeHelper.create({
             },
             function (error, response, body) {
 
-                if (error) {
+                if (body && JSON.parse(body).error) {
 
-                    console.log(this.name + " - Error while requesting access token:");
-                    console.log(error);
+                    console.error(self.name + " - Error while requesting access token:");
+                    console.error(JSON.parse(body));
 
-                    self.sendSocketNotification("FETCH_INFO_ERROR", error);
+                    self.sendSocketNotification("FETCH_INFO_ERROR_" + config.id, { "error": JSON.parse(body).error, "errorDescription": JSON.parse(body).error_description } );
 
                     return;
-
                 }
 
                 const accessTokenJson = JSON.parse(body);
@@ -78,12 +77,12 @@ module.exports = NodeHelper.create({
                       }
                   }, function (error, response, body) {
 
-                      if (error) {
+                      if (body && JSON.parse(body).error) {
 
-                          console.log(this.name + " - Error while requesting tasks:");
-                          console.log(error);
+                          console.error(self.name + " - Error while requesting tasks:");
+                          console.error(JSON.parse(body).error);
 
-                          self.sendSocketNotification("FETCH_INFO_ERROR", error);
+                          self.sendSocketNotification("FETCH_INFO_ERROR_" + config.id, { "error": JSON.parse(body).error.code, "errorDescription": JSON.parse(body).error.message } );
 
                           return;
                       }
@@ -115,7 +114,7 @@ module.exports = NodeHelper.create({
 
                       if (error) {
 
-                          console.log(this.name + " - Error while requesting task folders:");
+                          console.log(self.name + " - Error while requesting task folders:");
                           console.log(error);
 
                           self.sendSocketNotification("FETCH_INFO_ERROR", error);
