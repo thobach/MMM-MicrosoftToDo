@@ -1,0 +1,30 @@
+{
+  "name": "mmm-microsofttodo",
+  "version": "1.0.0",
+  "description": "MMM-MicrosoftToDo is a 3rd party module for MagicMirror (https://github.com/MichMich/MagicMirror) that shows open tasks from task lists. The tasks are retrieved from the Microsoft To Do / Outlook (https://todo.microsoft.com).",
+  "main": "node_helper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thobach/MMM-MicrosoftToDo.git"
+  },
+  "keywords": [
+    "todo",
+    "microsoft",
+    "magicmirror",
+    "magic",
+    "mirror",
+    "module"
+  ],
+  "author": "@thobach",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thobach/MMM-MicrosoftToDo/issues"
+  },
+  "homepage": "https://github.com/thobach/MMM-MicrosoftToDo#readme",
+  "dependencies": {
+    "requests": "^0.3.0"
+  }
+}
