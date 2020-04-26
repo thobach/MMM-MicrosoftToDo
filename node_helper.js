@@ -69,7 +69,7 @@ module.exports = NodeHelper.create({
                 // get tasks
                 var _getTodos = function(){
 
-                  var listUrl = "https://graph.microsoft.com/beta/me/outlook/taskFolders/" + config.listId + "/tasks?$select=subject,status&$top=" + config.itemLimit + "&$filter=status%20ne%20%27completed%27"
+                  var listUrl = "https://graph.microsoft.com/beta/me/outlook/taskFolders/" + config.listId + "/tasks?$select=subject,status&$top=" + config.itemLimit + "&$filter=status%20ne%20%27completed%27" + (config.orderBy == "subject" ? "&$orderby=subject" : "") + (config.orderBy == "dueDate" ? "&$orderby=duedatetime/datetime" : "")
 
                   request.get({
                       url: listUrl,
