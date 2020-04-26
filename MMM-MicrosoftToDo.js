@@ -43,6 +43,7 @@ Module.register("MMM-MicrosoftToDo",{
       if (notification === ("DATA_FETCHED_" + this.config.id)) {
 
         this.list = payload;
+        console.log(this.name + ' received list of ' + this.list.length + ' items.');
 
         // check if module should be hidden according to list size and the module's configuration
         if (this.config.hideIfEmpty) {
