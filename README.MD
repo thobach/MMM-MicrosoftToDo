@@ -2,6 +2,7 @@
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 [![Vulnerabilities](https://snyk.io/test/github/thobach/MMM-MicrosoftToDo/badge.svg?)](https://snyk.io/test/github/thobach/MMM-MicrosoftToDo)
+[![Build Status](https://travis-ci.com/thobach/MMM-MicrosoftToDo.svg?branch=master)](https://travis-ci.com/thobach/MMM-MicrosoftToDo)
 
 # MMM-MicrosoftToDo
 MMM-MicrosoftToDo is a 3rd party module for [MagicMirror](https://github.com/MichMich/MagicMirror) that shows open tasks from task lists. The tasks are retrieved from Microsoft To Do / Outlook.
