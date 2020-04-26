@@ -15,10 +15,12 @@ Register an app at https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirec
 1. Click on "+ New registration"
 2. Enter as "Name": "Magic Mirror"
 3. Select as "Supported account types": "Accounts in any organizational directory (Any Azure AD directory - Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)"
-4. Select as "Redirect URI": "Web"
-5. Set as "Redirect URI": "https://localhost:1234"
-6. Click "Register"
-7. Go to "Overview" and copy the "Application (client) ID" (Client ID), e.g. 4ef19f40-4892-4905-b999-76041e991f53`
+4. Click "Register"
+4. On the following screen click on "Add a Redirect URI", then "Add a Platform", select "Web"
+5. Set as "Redirect URIs": "https://localhost:1234"
+6. Check "Access tokens"
+6. Click "Configure"
+7. Go to "Overview" and copy the "Application (client) ID" (Client ID), e.g. `4ef19f40-4892-4905-b999-76041e991f53`
 
 
 ### Client Secret Key Generation (Client Secret)
@@ -27,14 +29,14 @@ Register an app at https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirec
 3. Set as "Description": "Magic Mirror"
 4. Select as "Expires": "Never"
 5. Click "Add"
-6. Copy the "Value", e.g. `1Q25ls?TKEDf4RWBKVUbKjnaVu=ytP.[`, it will be the client secret you need later
+6. Copy the "Value", e.g. `1Q25ls?TKEDf4RWBKVUbKjnaVu=ytP.[`, it will be the `client secret` you need later
 
 ### Authorization Code Generation (Code)
 Create authorization code by opening the following URL in your browser (but replace the client_id with your value):
 ```
 https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access%20user.read%20tasks.read&redirect_uri=https://localhost:1234&response_mode=query&state=12345
 ```
-1. Click on "Yes" and wait to be redirected
+1. Login and click on "Yes" and wait to be redirected
 2. Copy the `code` parameter from the URL in the browser, e.g. `M30cd0dff-af91-d061-8755-ffb3b328aa03` from
 ```
 https://localhost:1234/?code=M30cd0dff-af91-d061-8755-ffb3b328aa03&state=12345
@@ -43,7 +45,7 @@ https://localhost:1234/?code=M30cd0dff-af91-d061-8755-ffb3b328aa03&state=12345
 ### Refresh Token Generation (Refresh Token)
 Generate refresh token to allow the module to retrieve your task list going forward
 1. Open Terminal app
-2. Run the following command with your `client_id` (Client ID), `code` (Code) and `client_secret` (Client Secret) parameters
+2. Run the following command with your `client_id` (Client ID), `code` (Code) and `client_secret` (Client Secret) parameters (don't forget the trailing `'`)
 ```bash
 curl -X POST \
   https://login.microsoftonline.com/common/oauth2/v2.0/token \
