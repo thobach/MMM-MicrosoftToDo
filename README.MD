@@ -47,10 +47,7 @@ Generate refresh token to allow the module to retrieve your task list going forw
 1. Open Terminal app
 2. Run the following command with your `client_id` (Client ID), `code` (Code) and `client_secret` (Client Secret) parameters (don't forget the trailing `'`)
 ```bash
-curl -X POST \
-  https://login.microsoftonline.com/common/oauth2/v2.0/token \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d 'grant_type=authorization_code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access%20user.read%20tasks.read&code=M30cd0dff-af91-d061-8755-ffb3b328aa03&redirect_uri=https%3A%2F%2Flocalhost%3A1234&client_secret=1Q25ls?TKEDf4RWBKVUbKjnaVu=ytP.['
+curl -X POST https://login.microsoftonline.com/common/oauth2/v2.0/token -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=authorization_code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access%20user.read%20tasks.read&code=M30cd0dff-af91-d061-8755-ffb3b328aa03&redirect_uri=https%3A%2F%2Flocalhost%3A1234&client_secret=1Q25ls?TKEDf4RWBKVUbKjnaVu=ytP.["
 ```
 3. Copy the value of the `refresh_token` parameter from the response, e.g. `refresh_token`:
 ```
