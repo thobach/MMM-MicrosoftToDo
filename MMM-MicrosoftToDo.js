@@ -1,5 +1,5 @@
 /*
-global Module
+global Module, Log
 */
 Module.register('MMM-MicrosoftToDo', {
 
