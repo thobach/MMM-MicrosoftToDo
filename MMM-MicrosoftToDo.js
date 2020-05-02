@@ -41,9 +41,9 @@ Module.register('MMM-MicrosoftToDo', {
 
   socketNotificationReceived: function (notification, payload) {
     if (notification === ('FETCH_INFO_ERROR_' + this.config.id)) {
-      console.error('An error occurred while retrieving the todo list from Microsoft To Do. Please check the logs.')
-      console.error(payload.error)
-      console.error(payload.errorDescription)
+      Log.error('An error occurred while retrieving the todo list from Microsoft To Do. Please check the logs.')
+      Log.error(payload.error)
+      Log.error(payload.errorDescription)
       this.list = [{ subject: 'Error occurred: ' + payload.error + '. Check logs.' }]
 
       this.updateDom()
@@ -51,7 +51,7 @@ Module.register('MMM-MicrosoftToDo', {
 
     if (notification === ('DATA_FETCHED_' + this.config.id)) {
       this.list = payload
-      console.log(this.name + ' received list of ' + this.list.length + ' items.')
+      Log.info(this.name + ' received list of ' + this.list.length + ' items.')
 
       // check if module should be hidden according to list size and the module's configuration
       if (this.config.hideIfEmpty) {
@@ -61,7 +61,7 @@ Module.register('MMM-MicrosoftToDo', {
           }
         } else {
           if (!this.hidden) {
-            console.log(this.name + ' hiding module according to \'hideIfEmpty\' configuration, since there are no tasks present in the list.')
+            Log.info(this.name + ' hiding module according to \'hideIfEmpty\' configuration, since there are no tasks present in the list.')
             this.hide()
           }
         }
