@@ -5,13 +5,14 @@
 [![Build Status](https://travis-ci.com/thobach/MMM-MicrosoftToDo.svg?branch=master)](https://travis-ci.com/thobach/MMM-MicrosoftToDo)
 
 # MMM-MicrosoftToDo
-MMM-MicrosoftToDo is a 3rd party module for [MagicMirror](https://github.com/MichMich/MagicMirror) that shows open tasks from task lists. The tasks are retrieved from Microsoft To Do / Outlook.
+MMM-MicrosoftToDo is a 3rd party module for [MagicMirror](https://github.com/MichMich/MagicMirror) that shows open tasks from task lists and allows to complete them as well. The tasks are retrieved from Microsoft To Do / Outlook.
 
 The idea of this module is to display a shopping list on your mirror that you can control from your Microsoft To Do app and collaborate on with your family. Originally I used [MMM-Wunderlist](https://github.com/paviro/MMM-Wunderlist), though Wunderlist will be shut down and replaced by Microsoft To Do.
 
 ## Functionality
 * Display open to do list items from a to do list managed by Microsoft To Do
 * Update contents every minute
+* Complete task when clicking on it (disabled by default)
 
 ## Preparation
 In order to configure this module, you'll need some configuration parameters from Microsoft, which can be obtained as described in this section. All steps are required as the configuration parameters are needed for the installation below.
@@ -28,6 +29,7 @@ Register an app at https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirec
 6. Click "Configure"
 7. Go to "Overview" and copy the "Application (client) ID" (Client ID), e.g. `4ef19f40-4892-4905-b999-76041e991f53`
 
+Note: This setup does not work under an Azure Germany (with T-Systems as data trustee) account.
 
 ### Client Secret Key Generation (Client Secret)
 1. Go to "Certificates & secrets"
