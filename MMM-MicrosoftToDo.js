@@ -9,7 +9,7 @@ Module.register('MMM-MicrosoftToDo', {
     var self = this
 
     // checkbox icon is added based on configuration
-    var checkbox = this.config.showCheckbox ? '▢&nbsp; ' : ''
+    var checkbox = this.config.showCheckbox ? '▢ ' : ''
 
     // styled wrapper of the todo list
     var listWrapper = document.createElement('ul')
