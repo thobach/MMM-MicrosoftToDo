@@ -5,6 +5,9 @@ Module.register('MMM-MicrosoftToDo', {
 
   // Override dom generator.
   getDom: function () {
+    // copy module object to be accessible in callbacks
+    var self = this
+
     // checkbox icon is added based on configuration
     var checkbox = this.config.showCheckbox ? '▢&nbsp; ' : ''
 
@@ -16,18 +19,28 @@ Module.register('MMM-MicrosoftToDo', {
     listWrapper.style.listStyleType = 'none'
     listWrapper.classList.add('small')
 
-    var listItemsText = ''
-
     // for each entry add styled list items
     if (this.list.length !== 0) {
-      this.list.forEach(element => (listItemsText += '<li style="list-style-position:inside; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + checkbox + element.subject + '</li>'))
+      this.list.forEach(function (element) {
+        var listItem = document.createElement('li')
+        listItem.style.listStylePosition = 'inside'
+        listItem.style.whiteSpace = 'nowrap'
+        listItem.style.overflow = 'hidden'
+        listItem.style.textOverflow = 'ellipsis'
+        var listItemText = document.createTextNode(checkbox + element.subject)
+        listItem.appendChild(listItemText)
+        // complete task when clicked on it
+        if (self.config.completeOnClick) {
+          listItem.onclick = function () {
+            self.sendSocketNotification('COMPLETE_TASK', { module: self.data.identifier, taskId: element.id, config: self.config })
+          }
+        }
+        listWrapper.appendChild(listItem)
+      })
     } else {
       // otherwise indicate that there are no list entries
-      listItemsText += '<li style="list-style-position:inside; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + this.translate('NO_ENTRIES') + '</li>'
+      listWrapper.innerHTML += '<li style="list-style-position:inside; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + this.translate('NO_ENTRIES') + '</li>'
     }
-
-    // add list items to wrapper
-    listWrapper.innerHTML = listItemsText
 
     return listWrapper
   },
@@ -69,6 +82,10 @@ Module.register('MMM-MicrosoftToDo', {
 
       this.updateDom()
     }
+
+    if (notification === ('TASK_COMPLETED_' + this.config.id)) {
+      this.sendSocketNotification('FETCH_DATA', this.config)
+    }
   },
 
   start: function () {
@@ -96,6 +113,11 @@ Module.register('MMM-MicrosoftToDo', {
     // set default limit for number of tasks to be shown
     if (self.config.itemLimit === undefined) {
       self.config.itemLimit = '200'
+    }
+
+    // set default task completion on click to false
+    if (self.config.completeOnClick === undefined) {
+      self.config.completeOnClick = false
     }
 
     // in case there are multiple instances of this module, ensure the responses from node_helper are mapped to the correct module

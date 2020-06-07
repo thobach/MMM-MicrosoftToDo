@@ -40,7 +40,7 @@ Register an app at https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirec
 ### Authorization Code Generation (Code)
 Create authorization code by opening the following URL in your browser (but replace the client_id with your value):
 ```
-https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access%20user.read%20tasks.read&redirect_uri=https://localhost:1234&response_mode=query&state=12345
+https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access%20user.read%20tasks.readwrite&redirect_uri=https://localhost:1234&response_mode=query&state=12345
 ```
 1. Login and click on "Yes" and wait to be redirected
 2. Copy the `code` parameter from the URL in the browser, e.g. `M30cd0dff-af91-d061-8755-ffb3b328aa03` from
@@ -53,7 +53,7 @@ Generate refresh token to allow the module to retrieve your task list going forw
 1. Open Terminal app
 2. Run the following command with your `client_id` (Client ID), `code` (Code) and `client_secret` (Client Secret) parameters (don't forget the trailing `'`)
 ```bash
-curl -X POST https://login.microsoftonline.com/common/oauth2/v2.0/token -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=authorization_code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access%20user.read%20tasks.read&code=M30cd0dff-af91-d061-8755-ffb3b328aa03&redirect_uri=https%3A%2F%2Flocalhost%3A1234&client_secret=1Q25ls?TKEDf4RWBKVUbKjnaVu=ytP.["
+curl -X POST https://login.microsoftonline.com/common/oauth2/v2.0/token -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=authorization_code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access%20user.read%20tasks.readwrite&code=M30cd0dff-af91-d061-8755-ffb3b328aa03&redirect_uri=https%3A%2F%2Flocalhost%3A1234&client_secret=1Q25ls?TKEDf4RWBKVUbKjnaVu=ytP.["
 ```
 3. Copy the value of the `refresh_token` parameter from the response, e.g. `refresh_token`:
 ```
@@ -94,6 +94,7 @@ modules: [
       maxWidth: 450, // optional parameter: max width in pixel, default value is 450
       itemLimit: 200, // optional parameter: limit on the number of items to show from the list, default value is 200
       orderBy: 'subject', // optional parameter: 'subject' - order results by subject/name, 'dueDate' - order results by due date, default value is unordered
+      completeOnClick: true, // optional parameter: default value is false, when set to true complete task when clicking on it
     }
   },
 ]

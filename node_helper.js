@@ -17,9 +17,43 @@ module.exports = NodeHelper.create({
   socketNotificationReceived: function (notification, payload) {
     if (notification === 'FETCH_DATA') {
       this.fetchData(payload)
+    } else if (notification === 'COMPLETE_TASK') {
+      this.completeTask(payload.taskId, payload.config)
     } else {
       console.log(this.name + ' - Did not process event: ' + notification)
     }
+  },
+
+  completeTask: function (taskId, config) {
+    // copy context to be available inside callbacks
+    var self = this
+
+    var completeTaskUrl = 'https://graph.microsoft.com/beta/me/outlook/tasks/' + taskId + '/complete'
+
+    request.post({
+      url: completeTaskUrl,
+      headers: {
+        Authorization: 'Bearer ' + self.accessToken
+      }
+    }, function (error, response, body) {
+      if (error) {
+        console.error(self.name + ' - Error while requesting access token:')
+        console.error(error)
+        return
+      }
+
+      if (body && JSON.parse(body).error) {
+        console.error(self.name + ' - Error while completing tasks:')
+        console.error(JSON.parse(body).error)
+        self.sendSocketNotification('COMPLETE_TASK_ERROR', { error: JSON.parse(body).error.code, errorDescription: JSON.parse(body).error.message })
+        return
+      }
+
+      console.log(this.name + ' - Completed task with ID: ' + taskId)
+
+      // update front-end about success to trigger a refresh of the task list
+      self.sendSocketNotification('TASK_COMPLETED_' + config.id)
+    })
   },
 
   getTodos: function (config) {
@@ -31,7 +65,7 @@ module.exports = NodeHelper.create({
     var refreshToken = config.oauth2RefreshToken
     var data = {
       client_id: config.oauth2ClientId,
-      scope: 'offline_access user.read tasks.read',
+      scope: 'offline_access user.read ' + (config.completeOnClick ? 'tasks.readwrite' : 'tasks.read'),
       refresh_token: refreshToken,
       grant_type: 'refresh_token',
       client_secret: config.oauth2ClientSecret
@@ -44,6 +78,7 @@ module.exports = NodeHelper.create({
       if (error) {
         console.error(self.name + ' - Error while requesting access token:')
         console.error(error)
+        return
       }
 
       if (body && JSON.parse(body).error) {
@@ -57,6 +92,7 @@ module.exports = NodeHelper.create({
 
       const accessTokenJson = JSON.parse(body)
       var accessToken = accessTokenJson.access_token
+      self.accessToken = accessToken
 
       // get tasks
       var _getTodos = function () {
@@ -103,8 +139,8 @@ module.exports = NodeHelper.create({
           }
         }, function (error, response, body) {
           if (error) {
-            console.log(self.name + ' - Error while requesting task folders:')
-            console.log(error)
+            console.error(self.name + ' - Error while requesting task folders:')
+            console.error(error)
 
             self.sendSocketNotification('FETCH_INFO_ERROR', error)
 
