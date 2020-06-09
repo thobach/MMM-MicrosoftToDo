@@ -92,6 +92,8 @@ modules: [
       oauth2ClientId: '4ef19f40-4892-4905-b999-76041e991f53',
       listId: 'AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA=', // optional parameter: default value is the "Tasks" list
       showCheckbox: true, // optional parameter: default value is true and will show a checkbox before each todo list item
+      showDueDate: false, // optional parameter: default value is false and will show the todo list items due date if it exists on the todo list item
+      dateFormat: 'ddd MMM Do [ - ]', //optional parameter: uses moment date format and the default value is 'ddd MMM Do [ - ]'
       hideIfEmpty: false, // optional parameter: default value is false and will show the module also when the todo list is empty
       maxWidth: 450, // optional parameter: max width in pixel, default value is 450
       itemLimit: 200, // optional parameter: limit on the number of items to show from the list, default value is 200
