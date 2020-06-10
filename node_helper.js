@@ -103,7 +103,6 @@ module.exports = NodeHelper.create({
           url: listUrl,
           headers: {
             Authorization: 'Bearer ' + accessToken
-            //Prefer: outlook.timezone="Eastern Standard Time"  // Need to be a parameter
           }
         }, function (error, response, body) {
           if (error) {
