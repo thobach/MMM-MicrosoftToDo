@@ -1,6 +1,6 @@
 
 /*
-global Module, Log
+global Module, Log, moment
 */
 Module.register('MMM-MicrosoftToDo', {
 
@@ -23,34 +23,31 @@ Module.register('MMM-MicrosoftToDo', {
     // for each entry add styled list items
     if (this.list.length !== 0) {
       this.list.forEach(function (element) {
-
-      // Get due date array
-      if (self.config.showDueDate === true && element['dueDateTime'] != null) {
-        taskDue = Object.values(element['dueDateTime'])
-        taskDue = moment(taskDue[0]).format(self.config.dateFormat)
-      } else {
-        taskDue = "";
-      }
-
-      var listItem = document.createElement('li')
-      listItem.style.listStylePosition = 'inside'
-      listItem.style.whiteSpace = 'nowrap'
-      listItem.style.overflow = 'hidden'
-      listItem.style.textOverflow = 'ellipsis'
-      var listItemText = document.createTextNode(checkbox + taskDue + element.subject)
-      listItem.appendChild(listItemText)
-      // complete task when clicked on it
-      if (self.config.completeOnClick) {
-        listItem.onclick = function () {
-          self.sendSocketNotification('COMPLETE_TASK', { module: self.data.identifier, taskId: element.id, config: self.config })
+        // Get due date array
+        var taskDue = ''
+        if (self.config.showDueDate === true && element.dueDateTime != null) {
+          taskDue = Object.values(element.dueDateTime)
+          taskDue = moment(taskDue[0]).format(self.config.dateFormat)
         }
-      }
-      listWrapper.appendChild(listItem)
-    })
-  } else {
-    // otherwise indicate that there are no list entries
-    listWrapper.innerHTML += '<li style="list-style-position:inside; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + this.translate('NO_ENTRIES') + '</li>'
-  }
+        var listItem = document.createElement('li')
+        listItem.style.listStylePosition = 'inside'
+        listItem.style.whiteSpace = 'nowrap'
+        listItem.style.overflow = 'hidden'
+        listItem.style.textOverflow = 'ellipsis'
+        var listItemText = document.createTextNode(checkbox + taskDue + element.subject)
+        listItem.appendChild(listItemText)
+        // complete task when clicked on it
+        if (self.config.completeOnClick) {
+          listItem.onclick = function () {
+            self.sendSocketNotification('COMPLETE_TASK', { module: self.data.identifier, taskId: element.id, config: self.config })
+          }
+        }
+        listWrapper.appendChild(listItem)
+      })
+    } else {
+      // otherwise indicate that there are no list entries
+      listWrapper.innerHTML += '<li style="list-style-position:inside; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + this.translate('NO_ENTRIES') + '</li>'
+    }
     return listWrapper
   },
 
