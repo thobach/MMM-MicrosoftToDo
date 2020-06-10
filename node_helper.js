@@ -97,12 +97,13 @@ module.exports = NodeHelper.create({
       // get tasks
       var _getTodos = function () {
         var orderBy = (config.orderBy === 'subject' ? '&$orderby=subject' : '') + (config.orderBy === 'dueDate' ? '&$orderby=duedatetime/datetime' : '')
-        var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config.listId + '/tasks?$select=subject,status&$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27' + orderBy
+        var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config.listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27' + orderBy
 
         request.get({
           url: listUrl,
           headers: {
             Authorization: 'Bearer ' + accessToken
+            //Prefer: outlook.timezone="Eastern Standard Time"  // Need to be a parameter
           }
         }, function (error, response, body) {
           if (error) {

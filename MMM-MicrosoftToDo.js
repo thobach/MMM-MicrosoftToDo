@@ -1,3 +1,4 @@
+
 /*
 global Module, Log
 */
@@ -22,26 +23,34 @@ Module.register('MMM-MicrosoftToDo', {
     // for each entry add styled list items
     if (this.list.length !== 0) {
       this.list.forEach(function (element) {
-        var listItem = document.createElement('li')
-        listItem.style.listStylePosition = 'inside'
-        listItem.style.whiteSpace = 'nowrap'
-        listItem.style.overflow = 'hidden'
-        listItem.style.textOverflow = 'ellipsis'
-        var listItemText = document.createTextNode(checkbox + element.subject)
-        listItem.appendChild(listItemText)
-        // complete task when clicked on it
-        if (self.config.completeOnClick) {
-          listItem.onclick = function () {
-            self.sendSocketNotification('COMPLETE_TASK', { module: self.data.identifier, taskId: element.id, config: self.config })
-          }
-        }
-        listWrapper.appendChild(listItem)
-      })
-    } else {
-      // otherwise indicate that there are no list entries
-      listWrapper.innerHTML += '<li style="list-style-position:inside; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + this.translate('NO_ENTRIES') + '</li>'
-    }
 
+      // Get due date array
+      if (self.config.showDueDate === true && element['dueDateTime'] != null) {
+        taskDue = Object.values(element['dueDateTime'])
+        taskDue = moment(taskDue[0]).format(self.config.dateFormat)
+      } else {
+        taskDue = "";
+      }
+
+      var listItem = document.createElement('li')
+      listItem.style.listStylePosition = 'inside'
+      listItem.style.whiteSpace = 'nowrap'
+      listItem.style.overflow = 'hidden'
+      listItem.style.textOverflow = 'ellipsis'
+      var listItemText = document.createTextNode(checkbox + taskDue + element.subject)
+      listItem.appendChild(listItemText)
+      // complete task when clicked on it
+      if (self.config.completeOnClick) {
+        listItem.onclick = function () {
+          self.sendSocketNotification('COMPLETE_TASK', { module: self.data.identifier, taskId: element.id, config: self.config })
+        }
+      }
+      listWrapper.appendChild(listItem)
+    })
+  } else {
+    // otherwise indicate that there are no list entries
+    listWrapper.innerHTML += '<li style="list-style-position:inside; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + this.translate('NO_ENTRIES') + '</li>'
+  }
     return listWrapper
   },
 
@@ -118,6 +127,16 @@ Module.register('MMM-MicrosoftToDo', {
     // set default task completion on click to false
     if (self.config.completeOnClick === undefined) {
       self.config.completeOnClick = false
+    }
+
+    // decide if the task due date should be shown in front of each todo list item, if it exists
+    if (self.config.showDueDate === undefined) {
+      self.config.showDueDate = false
+    }
+
+    // format to display the due date
+    if (self.config.dateFormat === undefined) {
+      self.config.dateFormat = 'ddd MMM Do [ - ]'
     }
 
     // in case there are multiple instances of this module, ensure the responses from node_helper are mapped to the correct module
