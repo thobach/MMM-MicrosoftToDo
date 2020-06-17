@@ -66,20 +66,9 @@ from the full response
 {"token_type":"Bearer","scope":"User.Read Tasks.Read","expires_in":3600,"ext_expires_in":3600,"access_token":"EwBwA8l6BAAUO9chh8cJscQLmU+LSWpbnr0vmwwAAQMC79sEwx4KyeAHQmWi48AYLyFufrOurKrSQRBVaB1CPFwrn/CniDdPAEQYSzb95gEseUsnH3QAjbfi1s5Ya8oW5tLW2atfMG8ttdCnN/Rl8/ZdzfZcFkFQSgJ3kibm33Ov9NGXkKubHBgk0etwhyBsFR25PcDRZgc9hLIgR3dt9OCTF+Ph5lRQqOX8ABQbYy6zm15BHKSOqbHF82QHntrqUZf9u94J7S0ez0reltsOdrFTK0rWcbTMAWjNQfBLoMvdJnqVgTSF++WvkTQCCjTpu+LDEfA7axWBDfAQIXh+KFh2OfLVhST4NKPQNrRgsyI0Mi3kKak/gC7/are8bxQDZgAACHz3HW3uBQHCQAKbkNX8hKy6+AODSWnD/zP0vkRXsoRkiR3JJH7VxrnB31qo9W3Y9PokxT2SBj/97BPmuiJDJ98j190k+MJ/W1kLsL7PbZN9svwLEk8UpPDF2MDiu7GTdhvS7fPDODRBBrK75fU+n1wynvTas+q3ybFM+d0fiqW0p9eUxb7GsK1A0BwXpARW+oFQ2W1g7lzq/w2ss+NyvbjUpizEWw9hUFgJhi32b3ww/r7f0faZRz9vmsLSahbvywo2HG7gzJRdSFbUnoxXRJdFeQpCfxRIhLbE/fx9rB9e0+ENWRuuWqpuJNFjHW9VcV837KAqEwJE9T0F0bacYIq1mcm/n+7g6HSOs27H9LtEHZec6Z+nPPYLxFiN2uRqKaVC7ZBCf6DLfUtQ9sbaDlzI+UUe+GnCTnc2is/hbjYPtK/leiUvOk3jxYBGuU2Jb1kPxH3ahRFlmBYB0mQtbqgOa9DNi0An9eMy+Y/uaLP7EVweQd2bFcBt7tF1nLMQQNUNBfYUva/b2S4SsTVsbHp2tCRmrufFmLrQtFDaG/zJY+tZmnwy8QjbYch9CwEMWRe8+mrtwWy4JKwK00SxoApoDgsaQK/aRYkR5+kn1N/NSwkByyKK6oMbRlFf9SnRsqdFIlgW7gmeizEPhRGqvwTnltghoQdM/aSqY53UQ2jd6H0vYy1PFBtq2s6EGL0Mf9az7JguOgee/WBrI3bN4hQn/xGnrGpkaghsD/2mtRxOAkoEMdxfYQRO60eknbF2QsyYjoOS6V/9ClhzAg==","refresh_token":"MCVDmtyumC8ZdlGxrkMwCdur4FbPh7GHjy1gOaOHEA8*c5tTI4oIcJAHU8AflLZMLmcCRWNEa7nMkag2hbipYbZ3QgL9JB1G6Hc*JZY9oA5j46Cq79b6BDx8mivTVen0r*39h2hw9pngKS7MGXjKc9efwayQ7UhsFoCJ2wdhLJzv5gTR2EozgcsKsxHODj!1fV8a1sqVqJ!sU*CBLTMsm0twI2hZqsCkPoSWaMIS5kKFAq7bCsfNaumS11TZYni3XjVwuyHn4DEqfLGjHuSNo1TYRifcG422MdG6bYt7tBxWiw5dlq2iIEMl6O*N2sLWU7W0Ns2*oQbcXIFxRsZ8cHP*6M9dn*9Axg8WbtERj!*jHTfC!Ax6IILXrHDJkdAXgh01PVH!huztVrgd0UC6E4R4zJSOa4ytOKWfQcL9h0NdA“}
 ```
 
-## Identification of ID of the task folder (Task List ID)
-If you don't want to display the default task folder, you'll need need to identify the ID of the task list as follows:
-
-1. Go to https://to-do.microsoft.com/tasks/?fromOwa=true and sign-in if necessary
-2. Select your desired task list
-3. Copy the task list ID from the URL, e.g. `AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA=` from
-```
-https://to-do.microsoft.com/tasks/AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA=
-```
-
-
 ## Installation
 1. Navigate into your MagicMirror's `modules` folder and execute `git clone https://github.com/thobach/MMM-MicrosoftToDo.git`.
-2. In order to load the MMM-MicrosoftToDo module you will need to add the following configuration to your `config/config.js` file. As `oauth2ClientSecret` you need to provide Client Secret from above, as `oauth2RefreshToken` you set the Refresh Token, as `oauth2ClientId` you set the Client ID and as `listId` you set the Task List ID from above. If you omit the `listId` the default task list will be used.
+2. In order to load the MMM-MicrosoftToDo module you will need to add the following configuration to your `config/config.js` file. As `oauth2ClientSecret` you need to provide Client Secret from above, as `oauth2RefreshToken` you set the Refresh Token, as `oauth2ClientId` you set the Client ID and as `listName` you set the exact name of the task list, or leave it blank to show items from the default "Tasks" list.
 ```javascript
 modules: [
   {
@@ -90,7 +79,8 @@ modules: [
       oauth2ClientSecret: '1Q25ls%3FTKEDf4RWBKVUbKjnaVu%3DytP.%5B',
       oauth2RefreshToken: 'MCVDmtyumC8ZdlGxrkMwCdur4FbPh7GHjy1gOaOHEA8*c5tTI4oIcJAHU8AflLZMLmcCRWNEa7nMkag2hbipYbZ3QgL9JB1G6Hc*JZY9oA5j46Cq79b6BDx8mivTVen0r*39h2hw9pngKS7MGXjKc9efwayQ7UhsFoCJ2wdhLJzv5gTR2EozgcsKsxHODj!1fV8a1sqVqJ!sU*CBLTMsm0twI2hZqsCkPoSWaMIS5kKFAq7bCsfNaumS11TZYni3XjVwuyHn4DEqfLGjHuSNo1TYRifcG422MdG6bYt7tBxWiw5dlq2iIEMl6O*N2sLWU7W0Ns2*oQbcXIFxRsZ8cHP*6M9dn*9Axg8WbtERj!*jHTfC!Ax6IILXrHDJkdAXgh01PVH!huztVrgd0UC6E4R4zJSOa4ytOKWfQcL9h0NdA',
       oauth2ClientId: '4ef19f40-4892-4905-b999-76041e991f53',
-      listId: 'AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA=', // optional parameter: default value is the "Tasks" list
+      listName: 'Shopping List', // optional parameter: if not specified displays tasks from default "Tasks" list, if specified will look for a task list with the specified name (exact spelling)
+      listId: 'AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA=', // deprecated parameter: use listName instead
       showCheckbox: true, // optional parameter: default value is true and will show a checkbox before each todo list item
       showDueDate: false, // optional parameter: default value is false and will show the todo list items due date if it exists on the todo list item
       dateFormat: 'ddd MMM Do [ - ]', //optional parameter: uses moment date format and the default value is 'ddd MMM Do [ - ]'

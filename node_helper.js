@@ -97,7 +97,7 @@ module.exports = NodeHelper.create({
       // get tasks
       var _getTodos = function () {
         var orderBy = (config.orderBy === 'subject' ? '&$orderby=subject' : '') + (config.orderBy === 'dueDate' ? '&$orderby=duedatetime/datetime' : '')
-        var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config.listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27' + orderBy
+        var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config._listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27' + orderBy
 
         request.get({
           url: listUrl,
@@ -125,39 +125,53 @@ module.exports = NodeHelper.create({
         })
       }
 
-      // if list ID was provided, retrieve its tasks
-      if (config.listId !== undefined && config.listId !== '') {
-        _getTodos()
-      } else {
-        // otherwise identify the list ID of the default task list first
-        var taksFoldersUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/?$top=200'
+      // get ID of task folder
+      var taksFoldersUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/?$top=200'
 
-        request.get({
-          url: taksFoldersUrl,
-          headers: {
-            Authorization: 'Bearer ' + accessToken
-          }
-        }, function (error, response, body) {
-          if (error) {
-            console.error(self.name + ' - Error while requesting task folders:')
-            console.error(error)
+      request.get({
+        url: taksFoldersUrl,
+        headers: {
+          Authorization: 'Bearer ' + accessToken
+        }
+      }, function (error, response, body) {
+        if (error) {
+          console.error(self.name + ' - Error while requesting task folders:')
+          console.error(error)
 
-            self.sendSocketNotification('FETCH_INFO_ERROR', error)
+          self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: 'Error while requesting task folders', errorDescription: error })
 
-            return
-          }
+          return
+        }
 
-          // parse response from Microsoft
-          var list = JSON.parse(body)
+        // parse response from Microsoft
+        var list = JSON.parse(body)
 
+        // if list name was provided, retrieve its ID
+        if (config.listName !== undefined && config.listName !== '') {
+          list.value.forEach(element => element.name === config.listName ? (config._listId = element.id) : '')
+        } else if (config.listId !== undefined && config.listId !== '') {
+          // if list ID was provided copy it to internal list ID config and show deprecation warning
+          config._listId = config.listId
+          console.warn(self.name + ' - Warning, configuration parameter listId is deprecated, please use listName instead, otherwise the module will not work anymore in the future.')
+          // TODO: during the next release uncomment the following line to not show the todo list, but the error message instead
+          // self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, {
+          // error: 'Config param "listId" is deprecated, use "listName" instead',
+          // errorDescription: 'The configuration parameter listId is deprecated, please use listName instead. See https://github.com/thobach/MMM-MicrosoftToDo/blob/master/README.MD#installation' })
+        } else {
+          // otherwise identify the list ID of the default task list first
           // set listID to default task list "Tasks"
-          list.value.forEach(element => element.isDefaultFolder ? (config.listId = element.id) : '')
+          list.value.forEach(element => element.isDefaultFolder ? (config._listId = element.id) : '')
+        }
 
-          // based on new configuration data (listId), get tasks
+        if (config._listId !== undefined && config._listId !== '') {
+          // based on translated configuration data (listName -> listId), get tasks
           _getTodos()
-        } // function callback for task folders
-        )
-      } // else
+        } else {
+          self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: '"' + config.listName + '" task folder not found', errorDescription: 'The task folder "' + config.listName + '" could not be found.' })
+          console.error(self.name + ' - Error while requesting task folders: Could not find task folder ID for task folder name "' + config.listName + '", or could not find default folder in case no task folder name was provided.')
+        }
+      } // function callback for task folders
+      )
     })
   },
 
