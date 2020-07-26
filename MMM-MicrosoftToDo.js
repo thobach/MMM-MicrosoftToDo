@@ -136,6 +136,11 @@ Module.register('MMM-MicrosoftToDo', {
       self.config.dateFormat = 'ddd MMM Do [ - ]'
     }
 
+    // set default refresh interval to 60s
+    if (self.config.refreshSeconds === undefined) {
+      self.config.refreshSeconds = 60
+    }
+
     // in case there are multiple instances of this module, ensure the responses from node_helper are mapped to the correct module
     self.config.id = this.identifier
 
@@ -144,7 +149,7 @@ Module.register('MMM-MicrosoftToDo', {
       self.sendSocketNotification('FETCH_DATA', self.config)
     }
     refreshFunction()
-    setInterval(refreshFunction, 60000)
+    setInterval(refreshFunction, self.config.refreshSeconds * 1000)
   }
 
 })
