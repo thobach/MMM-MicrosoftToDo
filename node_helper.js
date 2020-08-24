@@ -104,7 +104,7 @@ module.exports = NodeHelper.create({
         } else if (config.dynamicLists === 'important') {
             //filter the predefined/dynamic list "Important"
             //To-Do for feature: adding support for all "predefined/dynamic lists"
-            var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config._listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=importance%20eq%20%27high%27' + orderBy
+            var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config._listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27%20and%20importance%20eq%20%27high%27' + orderBy
         }
 
         request.get({
