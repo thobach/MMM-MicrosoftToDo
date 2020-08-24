@@ -97,7 +97,15 @@ module.exports = NodeHelper.create({
       // get tasks
       var _getTodos = function () {
         var orderBy = (config.orderBy === 'subject' ? '&$orderby=subject' : '') + (config.orderBy === 'dueDate' ? '&$orderby=duedatetime/datetime' : '')
-        var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config._listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27' + orderBy
+        
+        //Adding "if statement" to support "predefined/dynamic lists" from Microsoft
+        if (config.dynamicLists === undefined && config.dynamicLists === '') {
+            var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config._listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27' + orderBy
+        } else if (config.dynamicLists === 'important') {
+            //filter the predefined/dynamic list "Important"
+            //To-Do for feature: adding support for all "predefined/dynamic lists"
+            var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config._listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=importance%20eq%20%27high%27' + orderBy
+        }
 
         request.get({
           url: listUrl,
