@@ -99,7 +99,7 @@ module.exports = NodeHelper.create({
         var orderBy = (config.orderBy === 'subject' ? '&$orderby=subject' : '') + (config.orderBy === 'dueDate' ? '&$orderby=duedatetime/datetime' : '')
         
         //Adding "if statement" to support "predefined/dynamic lists" from Microsoft
-        if (config.dynamicLists === undefined && config.dynamicLists === '') {
+        if (config.dynamicLists == undefined && config.dynamicLists == '') {
             var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config._listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27' + orderBy
         } else if (config.dynamicLists === 'important') {
             //filter the predefined/dynamic list "Important"
