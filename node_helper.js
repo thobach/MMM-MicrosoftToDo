@@ -165,6 +165,9 @@ module.exports = NodeHelper.create({
           // self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, {
           // error: 'Config param "listId" is deprecated, use "listName" instead',
           // errorDescription: 'The configuration parameter listId is deprecated, please use listName instead. See https://github.com/thobach/MMM-MicrosoftToDo/blob/master/README.MD#installation' })
+        } else if (config.dynamicList === 'important') {
+          // if dynamicList is set, create an array of listId's
+          list.value.foreach(element => config._listId = element.id)
         } else {
           // otherwise identify the list ID of the default task list first
           // set listID to default task list "Tasks"
@@ -173,7 +176,7 @@ module.exports = NodeHelper.create({
 
         if (config._listId !== undefined && config._listId !== '') {
           // based on translated configuration data (listName -> listId), get tasks
-          _getTodos()
+          config._listId.forEach(element => _getTodos())
         } else {
           self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: '"' + config.listName + '" task folder not found', errorDescription: 'The task folder "' + config.listName + '" could not be found.' })
           console.error(self.name + ' - Error while requesting task folders: Could not find task folder ID for task folder name "' + config.listName + '", or could not find default folder in case no task folder name was provided.')
