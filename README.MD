@@ -81,7 +81,7 @@ modules: [
       oauth2ClientId: '4ef19f40-4892-4905-b999-76041e991f53',
       listName: 'Shopping List', // optional parameter: if not specified displays tasks from default "Tasks" list, if specified will look for a task list with the specified name (exact spelling)
       listId: 'AQMkADAwATNiZmYAZC1iODgANS1hNGMyLTAwAi0wMAoALgAAA1Lh_i4gMGJMlZDpJ2d8iWwBAB_qpxIEaN5AgOOJ-T1mRJ8AAzJQqfYAAAA=', // deprecated parameter: use listName instead
-      dynamicList: 'important', //optional parameter: currently only the list "important" is supported. If not specified displays tasks from default "Tasks" list, (if this is set it will ignore "listName" & "listId").
+      dynamicList: 'important', //optional parameter: currently only the list "important" is supported and only tasks from default tasklists are shown. If not specified displays tasks from default "Tasks" list, (if this is set it will ignore "listName" & "listId").
       showCheckbox: true, // optional parameter: default value is true and will show a checkbox before each todo list item
       showDueDate: false, // optional parameter: default value is false and will show the todo list items due date if it exists on the todo list item
       dateFormat: 'ddd MMM Do [ - ]', //optional parameter: uses moment date format and the default value is 'ddd MMM Do [ - ]'
