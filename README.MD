@@ -9,6 +9,15 @@ MMM-MicrosoftToDo is a 3rd party module for [MagicMirror](https://github.com/Mic
 
 The idea of this module is to display a shopping list on your mirror that you can control from your Microsoft To Do app and collaborate on with your family. Originally I used [MMM-Wunderlist](https://github.com/paviro/MMM-Wunderlist), though Wunderlist will be shut down and replaced by Microsoft To Do.
 
+View in Microsoft ToDo app:
+
+<img src="/screenshots/microsoft%20todo%20original%20app.png?raw=true" width="200" alt="View in Microsoft ToDo app" />
+
+Screenshot of this MMM-MicrosoftToDo module:
+
+<img src="/screenshots/microsoft%20todo%20magic%20mirror%20module.png?raw=true" width="200" alt="Screenshot of the MMM-MicrosoftToDo module" />
+
+
 ## Functionality
 * Display open to do list items from a to do list managed by Microsoft To Do
 * Update contents every minute
