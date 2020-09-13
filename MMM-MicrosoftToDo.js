@@ -26,8 +26,10 @@ Module.register('MMM-MicrosoftToDo', {
         // Get due date array
         var taskDue = ''
         if (self.config.showDueDate === true && element.dueDateTime != null) {
+          // timezone is returned as UTC
           taskDue = Object.values(element.dueDateTime)
-          taskDue = moment(taskDue[0]).format(self.config.dateFormat)
+          // converting time zone to browser provided timezone and formatting time according to configuration
+          taskDue = moment.utc(taskDue[0]).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format(self.config.dateFormat)
         }
         var listItem = document.createElement('li')
         listItem.style.listStylePosition = 'inside'
