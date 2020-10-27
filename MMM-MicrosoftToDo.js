@@ -9,9 +9,6 @@ Module.register('MMM-MicrosoftToDo', {
     // copy module object to be accessible in callbacks
     var self = this
 
-    // checkbox icon is added based on configuration
-    var checkbox = this.config.showCheckbox ? '▢ ' : ''
-
     // styled wrapper of the todo list
     var listWrapper = document.createElement('ul')
     listWrapper.style.maxWidth = this.config.maxWidth + 'px'
@@ -36,8 +33,32 @@ Module.register('MMM-MicrosoftToDo', {
         listItem.style.whiteSpace = 'nowrap'
         listItem.style.overflow = 'hidden'
         listItem.style.textOverflow = 'ellipsis'
-        var listItemText = document.createTextNode(checkbox + taskDue + element.subject)
-        listItem.appendChild(listItemText)
+
+        // checkbox icon is added based on configuration
+        if (this.config.showCheckbox) {
+            listItem.appendChild(document.createTextNode("▢ "))
+        }
+
+        // display the (previously formatted) due date
+        if (taskDue != '') {
+            listItem.appendChild(document.createTextNode(taskDue))
+        }
+        
+        // extract tags (#Tag) from subject an display them differently
+        var subjectTokens = element.subject.match(/((#[^\s]+)|(?!\s)[^#]*|\s+)+?/g)
+        for (var i=0; i < subjectTokens.length; i++) {
+            if (subjectTokens[i].startsWith("#")) {
+                var tagNode =document.createElement('span')
+                tagNode.innerText = subjectTokens[i]
+                if (self.config.highlightTagColor != null) {
+                    tagNode.style.color = self.config.highlightTagColor
+                }
+                listItem.appendChild(tagNode)
+            } else {
+                listItem.appendChild(document.createTextNode(subjectTokens[i]))
+            }
+        }
+
         // complete task when clicked on it
         if (self.config.completeOnClick) {
           listItem.onclick = function () {
@@ -131,6 +152,11 @@ Module.register('MMM-MicrosoftToDo', {
     // decide if the task due date should be shown in front of each todo list item, if it exists
     if (self.config.showDueDate === undefined) {
       self.config.showDueDate = false
+    }
+
+    // decide if tags should be highlighted
+    if (self.config.highlightTagColor === undefined) {
+      self.config.highlightTagColor = null
     }
 
     // format to display the due date
