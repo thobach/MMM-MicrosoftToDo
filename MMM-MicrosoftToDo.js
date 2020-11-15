@@ -1,4 +1,3 @@
-
 /*
 global Module, Log, moment
 */
@@ -22,6 +21,8 @@ Module.register('MMM-MicrosoftToDo', {
 
     // for each entry add styled list items
     if (this.list.length !== 0) {
+      // Define variable itemCounter and set to 0
+      itemCounter = 0	    
       this.list.forEach(function (element) {
         // Get due date array
         var taskDue = ''
