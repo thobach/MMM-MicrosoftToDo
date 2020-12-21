@@ -22,7 +22,7 @@ Module.register('MMM-MicrosoftToDo', {
     // for each entry add styled list items
     if (this.list.length !== 0) {
       // Define variable itemCounter and set to 0
-      itemCounter = 0	    
+      var itemCounter = 0
       this.list.forEach(function (element) {
         // Get due date array
         var taskDue = ''
@@ -47,7 +47,7 @@ Module.register('MMM-MicrosoftToDo', {
             self.config.fadePoint = 0
           }
           var startingPoint = self.config.itemLimit * self.config.fadePoint
-          var steps = self.config.itemLimit - startingPoint;
+          var steps = self.config.itemLimit - startingPoint
           if (itemCounter >= startingPoint) {
             var currentStep = itemCounter - startingPoint
             listItem.style.opacity = 1 - (1 / steps * currentStep)
