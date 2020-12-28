@@ -1,4 +1,3 @@
-
 /*
 global Module, Log, moment
 */
@@ -22,6 +21,8 @@ Module.register('MMM-MicrosoftToDo', {
 
     // for each entry add styled list items
     if (this.list.length !== 0) {
+      // Define variable itemCounter and set to 0
+      var itemCounter = 0
       this.list.forEach(function (element) {
         // Get due date array
         var taskDue = ''
@@ -36,6 +37,23 @@ Module.register('MMM-MicrosoftToDo', {
         listItem.style.whiteSpace = 'nowrap'
         listItem.style.overflow = 'hidden'
         listItem.style.textOverflow = 'ellipsis'
+
+        // needed for the fade effect
+        itemCounter += 1
+
+        // Create fade effect.
+        if (self.config.fade && self.config.fadePoint < 1) {
+          if (self.config.fadePoint < 0) {
+            self.config.fadePoint = 0
+          }
+          var startingPoint = self.config.itemLimit * self.config.fadePoint
+          var steps = self.config.itemLimit - startingPoint
+          if (itemCounter >= startingPoint) {
+            var currentStep = itemCounter - startingPoint
+            listItem.style.opacity = 1 - (1 / steps * currentStep)
+          }
+        }
+
         var listItemText = document.createTextNode(checkbox + taskDue + element.subject)
         listItem.appendChild(listItemText)
         // complete task when clicked on it

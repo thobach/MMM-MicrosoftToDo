@@ -101,6 +101,8 @@ modules: [
       orderBy: 'subject', // optional parameter: 'subject' - order results by subject/name, 'dueDate' - order results by due date, default value is unordered
       completeOnClick: true, // optional parameter: default value is false, when set to true complete task when clicking on it
       refreshSeconds: 60, // optional parameter: every how many seconds should the list be updated from the remote service, default value is 60
+      fade: true, //optional parameter: default value is false. True will fade the list towards the bottom from the point set in the fadePoint parameter
+      fadePoint: 0.5 //optional parameter: decimal value between 0 and 1 sets the point where the fade effect will start
     }
   },
 ]
