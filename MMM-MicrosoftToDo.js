@@ -46,7 +46,7 @@ Module.register('MMM-MicrosoftToDo', {
           self.config.fadePoint = self.config.fadePoint * (self.config.fadePoint >=0) // Sets fadePoint to 0 if < 0
           var startingPoint = self.config.itemLimit * self.config.fadePoint // Calculate startingPoint for fade effect
           var steps = self.config.itemLimit - startingPoint // Calculate the number of steps
-          var currentStep = (itemCounter - startingPoint) * (self.config.itemLimit >= itemCounter) // Calculate the current step
+          var currentStep = (itemCounter - startingPoint) * (self.config.itemLimit > itemCounter) + (itemCounter - startingPoint) * (itemLimit = itemCounter) * 0.9 // Calculate the current step
           listItem.style.opacity = 1 - (1 / steps * currentStep) // Calculate opacity
         }
           
