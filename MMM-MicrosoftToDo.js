@@ -50,7 +50,7 @@ Module.register('MMM-MicrosoftToDo', {
           var lastStep = (self.config.itemLimit == itemCount) * 0.1 // set opacity for lastItem (will be 0 when calculated in currentStep)
           listItem.style.opacity = 1 - (1 / steps * currentStep) + lastStep // Calculate opacity
         }
-      
+
         var listItemText = document.createTextNode(checkbox + taskDue + element.subject)
         listItem.appendChild(listItemText)
         // complete task when clicked on it
