@@ -43,12 +43,15 @@ Module.register('MMM-MicrosoftToDo', {
 
         // Create fade effect.
         if (self.config.fade && self.config.fadePoint < 1) {
-          self.config.fadePoint = self.config.fadePoint * (self.config.fadePoint >=0) // Sets fadePoint to 0 if < 0
+          self.config.fadePoint = self.config.fadePoint * (self.config.fadePoint >= 0) // Sets fadePoint to 0 if < 0
           var startingPoint = self.config.itemLimit * self.config.fadePoint // Calculate startingPoint for fade effect
           var steps = self.config.itemLimit - startingPoint // Calculate the number of steps
-          var currentStep = (itemCounter - startingPoint) * (self.config.itemLimit > itemCounter) // Calculate the current step
-          var lastStep = (self.config.itemLimit == itemCount) * 0.1 // set opacity for lastItem (will be 0 when calculated in currentStep)
-          listItem.style.opacity = 1 - (1 / steps * currentStep) + lastStep // Calculate opacity
+          var currentStep = (itemCounter - startingPoint) // Calculate the current step
+          if (itemCounter < self.config.itemLimit) {
+            listItem.style.opacity = 1 - (1 / steps * currentStep) // Calculate and set the opacity for the listItem
+          } else if (itemCounter === self.config.itemLimit) {
+            listItem.style.opacity = 0.9 * (1 - (1 / steps * (currentStep - 1))) // Set opacity of last item to 90% of the opacity of the second to last item
+          }
         }
 
         var listItemText = document.createTextNode(checkbox + taskDue + element.subject)
