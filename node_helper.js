@@ -19,33 +19,32 @@ module.exports = NodeHelper.create({
     if (notification === 'FETCH_DATA') {
       this.fetchData(payload)
     } else if (notification === 'COMPLETE_TASK') {
-      this.completeTask(payload.taskId, payload.config)
+      this.completeTask(payload.listId, payload.taskId, payload.config)
     } else {
       console.log(this.name + ' - Did not process event: ' + notification)
     }
   },
 
-  completeTask: function (taskId, config) {
+  completeTask: function (listId, taskId, config) {
     // copy context to be available inside callbacks
     const self = this
 
-    var completeTaskUrl = 'https://graph.microsoft.com/beta/me/outlook/tasks/' + taskId + '/complete'
+    var patchUrl = `https://graph.microsoft.com/v1.0/me/lists/${listId}/tasks/${taskId}`;
 
     const updateBody = {
       id: taskId,
       status: 'completed'
     }
 
-    fetch(tokenUrl, {
+    fetch(patchUrl, {
       method: 'PATCH',
-      body: JSON.stringify(body),
+      body: JSON.stringify(updateBody),
       headers: {
         'Content-Type': 'application/json',
         Authentication: 'Bearer ' + self.accessToken
       }
     }).then(self.checkFetchStatus)
       .then((response) => {
-        Log.info()
         self.sendSocketNotification('TASK_COMPLETED_' + config.id)
       })
       .error((error) => self.logError("COMPLETE_TASK_ERROR", error));
@@ -53,7 +52,7 @@ module.exports = NodeHelper.create({
 
   getTodos: function (config) {
     // copy context to be available inside callbacks
-    const self = this
+    let self = this
 
     // get access token
     var tokenUrl = 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
@@ -70,12 +69,15 @@ module.exports = NodeHelper.create({
       body: form
     }).then(self.checkFetchStatus)
       .then((response) => response.json())
+      .then(self.checkBodyError)
       .then((accessTokenJson) => {
         var accessToken = accessTokenJson.access_token
         self.accessToken = accessToken
         self.fetchList(accessToken, config)
       })
-      .catch((error) => self.logError('FETCH_INFO_ERROR_' + config.id, error))
+      .catch((error) => { 
+        self.logError('FETCH_INFO_ERROR_' + config.id, error)
+      });
   },
   fetchList: function (accessToken, config) {
     const self = this
@@ -88,6 +90,7 @@ module.exports = NodeHelper.create({
       }
     }).then(self.checkFetchStatus)
       .then((response) => response.json())
+      .then(self.checkBodyError)
       .then((responseData) => {
         // if list name was provided, retrieve its ID
         if (config.listName !== undefined && config.listName !== '') {
@@ -131,25 +134,36 @@ module.exports = NodeHelper.create({
       }
     }).then(self.checkFetchStatus)
       .then((response) => response.json())
+      .then(self.checkBodyError)
       .then((responseData) => {
-        self.sendSocketNotification('DATA_FETCHED_' + config.id, responseData.value)
+        var tasks = responseData.value.map((element) => {
+          return {
+            id: element.id,
+            title: element.title,
+            dueDateTime: element.dueDateTime,
+            listId: config._listId
+          }
+        } ) ;
+
+        self.sendSocketNotification('DATA_FETCHED_' + config.id, tasks)
       }) // function callback for task folders
       .catch(self.logError)
   },
   checkFetchStatus: function (response) {
-    if (response.ok) {
-      
-      if (response.body && JSON.parse(body).error) {
-        throw Error(JSON.parse(body).error);
-      }
-
+    if (response.ok) {    
       return response
     } else {
       throw Error(response.statusText)
     }
   },
+  checkBodyError: function (json) {
+    if (json && json.error) {
+      throw Error(json.error);
+    }
+    return json;
+  },
   logError: function (notificationName, error) {
     Log.error('[MMM-MicrosoftToDo] - Error fetching access token:' + error);
-    self.sendSocketNotification(notificationName, error);
+    this.sendSocketNotification(notificationName, error);
   }
 })

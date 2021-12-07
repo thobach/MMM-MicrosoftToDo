@@ -59,7 +59,7 @@ Module.register('MMM-MicrosoftToDo', {
         // complete task when clicked on it
         if (self.config.completeOnClick) {
           listItem.onclick = function () {
-            self.sendSocketNotification('COMPLETE_TASK', { module: self.data.identifier, taskId: element.id, config: self.config })
+            self.sendSocketNotification('COMPLETE_TASK', { module: self.data.identifier, listId: element.listId, taskId: element.id, config: self.config })
           }
         }
         listWrapper.appendChild(listItem)
