@@ -6,7 +6,8 @@
   webSecurity in Electron.
 */
 var NodeHelper = require('node_helper')
-const request = require('request')
+const fetch = require("node-fetch");
+const Log = require("logger");
 
 module.exports = NodeHelper.create({
 
@@ -26,7 +27,7 @@ module.exports = NodeHelper.create({
 
   completeTask: function (taskId, config) {
     // copy context to be available inside callbacks
-    var self = this
+    let self = this
 
     var completeTaskUrl = 'https://graph.microsoft.com/beta/me/outlook/tasks/' + taskId + '/complete'
 
@@ -58,97 +59,48 @@ module.exports = NodeHelper.create({
 
   getTodos: function (config) {
     // copy context to be available inside callbacks
-    var self = this
+    let self = this
 
     // get access token
     var tokenUrl = 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
     var refreshToken = config.oauth2RefreshToken
-    var data = {
-      client_id: config.oauth2ClientId,
-      scope: 'offline_access user.read ' + (config.completeOnClick ? 'tasks.readwrite' : 'tasks.read'),
-      refresh_token: refreshToken,
-      grant_type: 'refresh_token',
-      client_secret: config.oauth2ClientSecret
-    }
-    request.post({
-      url: tokenUrl,
-      form: data
-    },
-    function (error, response, body) {
-      if (error) {
-        console.error(self.name + ' - Error while requesting access token:')
-        console.error(error)
-        return
+    const form = new URLSearchParams();
+    form.append('client_id', config.oauth2ClientId);
+    form.append('scope', 'offline_access user.read ' + (config.completeOnClick ? 'tasks.readwrite' : 'tasks.read'));
+    form.append('refresh_token', refreshToken);
+    form.append('grant_type', 'refresh_token');
+    form.append('client_secret', config.oauth2ClientSecret)
+
+
+    fetch(tokenUrl, {
+      method: 'POST',
+      body: form
+    }).then(self.checkFetchStatus)
+      .then((response) => response.json())
+      .then((accessTokenJson) => {
+        var accessToken = accessTokenJson.access_token
+        self.accessToken = accessToken
+        self.fetchList(accessToken, config)
+      })
+      .catch(self.logError)
+
+  },
+  fetchList: function (accessToken, config) {
+    let self = this
+    // get ID of task folder
+    var getListUrl = 'https://graph.microsoft.com/v1.0/me/todo/lists/?$top=200'
+    fetch(getListUrl, {
+      method: "get",
+      headers: {
+        'Authorization': 'Bearer ' + accessToken,
       }
-
-      if (body && JSON.parse(body).error) {
-        console.error(self.name + ' - Error while requesting access token:')
-        console.error(JSON.parse(body))
-
-        self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: JSON.parse(body).error, errorDescription: JSON.parse(body).error_description })
-
-        return
-      }
-
-      const accessTokenJson = JSON.parse(body)
-      var accessToken = accessTokenJson.access_token
-      self.accessToken = accessToken
-
-      // get tasks
-      var _getTodos = function () {
-        var orderBy = (config.orderBy === 'subject' ? '&$orderby=subject' : '') + (config.orderBy === 'dueDate' ? '&$orderby=duedatetime/datetime' : '')
-        var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config._listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27' + orderBy
-
-        request.get({
-          url: listUrl,
-          headers: {
-            Authorization: 'Bearer ' + accessToken
-          }
-        }, function (error, response, body) {
-          if (error) {
-            console.error(self.name + ' - Error while requesting access token:')
-            console.error(error)
-          }
-
-          if (body && JSON.parse(body).error) {
-            console.error(self.name + ' - Error while requesting tasks:')
-            console.error(JSON.parse(body).error)
-
-            self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: JSON.parse(body).error.code, errorDescription: JSON.parse(body).error.message })
-
-            return
-          }
-
-          // send tasks to front-end
-          const tasksJson = JSON.parse(body)
-          self.sendSocketNotification('DATA_FETCHED_' + config.id, tasksJson.value)
-        })
-      }
-
-      // get ID of task folder
-      var taksFoldersUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/?$top=200'
-
-      request.get({
-        url: taksFoldersUrl,
-        headers: {
-          Authorization: 'Bearer ' + accessToken
-        }
-      }, function (error, response, body) {
-        if (error) {
-          console.error(self.name + ' - Error while requesting task folders:')
-          console.error(error)
-
-          self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: 'Error while requesting task folders', errorDescription: error })
-
-          return
-        }
-
-        // parse response from Microsoft
-        var list = JSON.parse(body)
+    }).then(self.checkFetchStatus)
+      .then((response) => response.json())
+      .then((responseData) => {
 
         // if list name was provided, retrieve its ID
         if (config.listName !== undefined && config.listName !== '') {
-          list.value.forEach(element => element.name === config.listName ? (config._listId = element.id) : '')
+          responseData.value.forEach(element => element.displayName === config.listName ? (config._listId = element.id) : '')
         } else if (config.listId !== undefined && config.listId !== '') {
           // if list ID was provided copy it to internal list ID config and show deprecation warning
           config._listId = config.listId
@@ -160,22 +112,51 @@ module.exports = NodeHelper.create({
         } else {
           // otherwise identify the list ID of the default task list first
           // set listID to default task list "Tasks"
-          list.value.forEach(element => element.isDefaultFolder ? (config._listId = element.id) : '')
+          responseData.value.forEach(element => element.wellknownListName === 'defaultList' ? (config._listId = element.id) : '')
         }
 
         if (config._listId !== undefined && config._listId !== '') {
           // based on translated configuration data (listName -> listId), get tasks
-          _getTodos()
+          self.getTasks(accessToken, config, config._listId)
         } else {
           self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: '"' + config.listName + '" task folder not found', errorDescription: 'The task folder "' + config.listName + '" could not be found.' })
           console.error(self.name + ' - Error while requesting task folders: Could not find task folder ID for task folder name "' + config.listName + '", or could not find default folder in case no task folder name was provided.')
         }
-      } // function callback for task folders
-      )
-    })
-  },
+      }) // function callback for task folders
+      .catch(error => {
+        Log.error("[MMM-MicrosoftToDo] - Error fetching task lists:" + error);
+      });
 
+  },
   fetchData: function (config) {
     this.getTodos(config)
+  },
+  getTasks: function (accessToken, config) {
+    let self = this
+    var orderBy = (config.orderBy === 'subject' ? '&$orderby=title' : '') + (config.orderBy === 'dueDate' ? '&$orderby=duedatetime/datetime' : '')
+    //var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config._listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27' + orderBy
+    var listUrl = 'https://graph.microsoft.com/v1.0/me/todo/lists/' + config._listId + '/tasks?$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27%20and%20duedatetime%2Fdatetime%20gt%20%272021-12-01T00%3A00%3A00%27' + orderBy
+
+    fetch(listUrl, {
+      method: "get",
+      headers: {
+        'Authorization': 'Bearer ' + accessToken,
+      }
+    }).then(self.checkFetchStatus)
+      .then((response) => response.json())
+      .then((responseData) => {
+        self.sendSocketNotification('DATA_FETCHED_' + config.id, responseData.value)
+      }) // function callback for task folders
+      .catch(self.logError)
+  },
+  checkFetchStatus: function (response) {
+    if (response.ok) {
+      return response;
+    } else {
+      throw Error(response.statusText);
+    }
+  },
+  logError: function (error) {
+    Log.error("[MMM-MicrosoftToDo] - Error fetching access token:" + error);
   }
 })

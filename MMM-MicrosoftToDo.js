@@ -54,7 +54,7 @@ Module.register('MMM-MicrosoftToDo', {
           }
         }
 
-        var listItemText = document.createTextNode(checkbox + taskDue + element.subject)
+        var listItemText = document.createTextNode(checkbox + taskDue + element.title)
         listItem.appendChild(listItemText)
         // complete task when clicked on it
         if (self.config.completeOnClick) {
