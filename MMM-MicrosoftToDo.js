@@ -120,6 +120,20 @@ Module.register('MMM-MicrosoftToDo', {
 
     // start with empty list that shows loading indicator
     self.list = [{ subject: this.translate('LOADING_ENTRIES') }]
+    self.validateConfig()
+
+    // update tasks every based on config refresh
+    var refreshFunction = function () {
+      self.sendSocketNotification('FETCH_DATA', self.config)
+    }
+    refreshFunction()
+    setInterval(refreshFunction, self.config.refreshSeconds * 1000)
+  },
+
+  validateConfig: function() {
+
+    // in case there are multiple instances of this module, ensure the responses from node_helper are mapped to the correct module
+    self.config.id = this.identifier
 
     // decide if a module should be shown if todo list is empty
     if (self.config.hideIfEmpty === undefined) {
@@ -161,15 +175,12 @@ Module.register('MMM-MicrosoftToDo', {
       self.config.refreshSeconds = 60
     }
 
-    // in case there are multiple instances of this module, ensure the responses from node_helper are mapped to the correct module
-    self.config.id = this.identifier
-
-    // update tasks every 60s
-    var refreshFunction = function () {
-      self.sendSocketNotification('FETCH_DATA', self.config)
+    if (self.config.listId !== undefined) {
+      Log.error(`${self.name} - configuration parameter listId is invalid, please use listName instead.`)
+      return false;
     }
-    refreshFunction()
-    setInterval(refreshFunction, self.config.refreshSeconds * 1000)
+
+    return true;
   }
 
 })

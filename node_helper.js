@@ -83,8 +83,16 @@ module.exports = NodeHelper.create({
   },
   fetchList: function (accessToken, config) {
     const self = this
+    
+    var filterClause = "wellknownListName eq 'defaultList'";
+    if (config.listName !== undefined && config.listName !== '') {
+      filterClause = `displayName eq '${config.listName}'`
+    }
+    
+    filterClause = encodeURIComponent(filterClause)
+
     // get ID of task folder
-    var getListUrl = 'https://graph.microsoft.com/v1.0/me/todo/lists/?$top=200'
+    var getListUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/?$top=200&$filter=${filterClause}`
     fetch(getListUrl, {
       method: 'get',
       headers: {
@@ -94,29 +102,13 @@ module.exports = NodeHelper.create({
       .then((response) => response.json())
       .then(self.checkBodyError)
       .then((responseData) => {
-        // if list name was provided, retrieve its ID
-        if (config.listName !== undefined && config.listName !== '') {
-          responseData.value.forEach(element => element.displayName === config.listName ? (config._listId = element.id) : '')
-        } else if (config.listId !== undefined && config.listId !== '') {
-          // if list ID was provided copy it to internal list ID config and show deprecation warning
-          config._listId = config.listId
-          Log.warn(`${self.name} - configuration parameter listId is deprecated, please use listName instead, otherwise the module will not work anymore in the future.`)
-          // TODO: during the next release uncomment the following line to not show the todo list, but the error message instead
-          // self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, {
-          // error: 'Config param "listId" is deprecated, use "listName" instead',
-          // errorDescription: 'The configuration parameter listId is deprecated, please use listName instead. See https://github.com/thobach/MMM-MicrosoftToDo/blob/master/README.MD#installation' })
-        } else {
-          // otherwise identify the list ID of the default task list first
-          // set listID to default task list "Tasks"
-          responseData.value.forEach(element => element.wellknownListName === 'defaultList' ? (config._listId = element.id) : '')
-        }
 
-        if (config._listId !== undefined && config._listId !== '') {
-          // based on translated configuration data (listName -> listId), get tasks
+        if (responseData.value.length > 0) {
+          config._listId = responseData.value.id
           self.getTasks(accessToken, config, config._listId)
-        } else {
-          self.sendSocketNotification(`FETCH_INFO_ERROR_${config.id}`, { error: `"${config.listName}" task folder not found`, errorDescription: `The task folder "${config.listName}" could not be found.` })
-          Log.error(`${self.name} - Error while requesting task folders: Could not find task folder ID for task folder name "${config.listName}", or could not find default folder in case no task folder name was provided.`)
+        }
+        else {
+          self.logError(`FETCH_INFO_ERROR_${config.id}`, { error: `"${config.listName}" task folder not found`, errorDescription: `The task folder "${config.listName}" could not be found.` })
         }
       }) // function callback for task folders
       .catch(error => self.logError(`FETCH_INFO_ERROR_${config.id}`, error))
