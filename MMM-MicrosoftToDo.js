@@ -30,7 +30,12 @@ Module.register('MMM-MicrosoftToDo', {
           // timezone is returned as UTC
           taskDue = Object.values(element.dueDateTime)
           // converting time zone to browser provided timezone and formatting time according to configuration
-          taskDue = moment.utc(taskDue[0]).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format(self.config.dateFormat)
+          var taskDueDate = moment.utc(taskDue[0]).tz(Intl.DateTimeFormat().resolvedOptions().timeZone)
+          if (self.config.useRelativeDate) {
+            taskDue = taskDueDate.fromNow()
+          } else {
+            taskDue = taskDueDate.format(self.config.dateFormat)
+          }
         }
         var listItem = document.createElement('li')
         listItem.style.listStylePosition = 'inside'
@@ -130,9 +135,8 @@ Module.register('MMM-MicrosoftToDo', {
     setInterval(refreshFunction, self.config.refreshSeconds * 1000)
   },
 
-  validateConfig: function() {
-
-    var self = this;
+  validateConfig: function () {
+    var self = this
 
     // in case there are multiple instances of this module, ensure the responses from node_helper are mapped to the correct module
     self.config.id = this.identifier
@@ -177,16 +181,24 @@ Module.register('MMM-MicrosoftToDo', {
       self.config.refreshSeconds = 60
     }
 
+    // set default useRelativeDate to false
+    if (self.config.useRelativeDate === undefined) {
+      self.config.useRelativeDate = false
+    }
+
+    // set default plannedTasks settings
     if (self.config.plannedTasks === undefined) {
       self.config.plannedTasks = {
         enable: false
       }
     }
 
+    // By default, don't ignore any lists
     if (self.config.plannedTasks.ignoreLists === undefined) {
       self.config.plannedTasks.ignoreLists = []
     }
 
+    // by default, only look at tasks 2 weeks out
     if (self.config.plannedTasks.duration === undefined) {
       self.config.plannedTasks.duration = {
         weeks: 2
@@ -195,10 +207,10 @@ Module.register('MMM-MicrosoftToDo', {
 
     if (self.config.listId !== undefined) {
       Log.error(`${self.name} - configuration parameter listId is invalid, please use listName instead.`)
-      return false;
+      return false
     }
 
-    return true;
+    return true
   }
 
 })

@@ -8,7 +8,7 @@
 var NodeHelper = require('node_helper')
 const fetch = require('node-fetch')
 const Log = require('logger')
-const { add, formatISO } = require("date-fns");
+const { add, formatISO, compareAsc, parse } = require('date-fns')
 module.exports = NodeHelper.create({
 
   start: function () {
@@ -83,16 +83,16 @@ module.exports = NodeHelper.create({
   },
   fetchList: function (accessToken, config) {
     const self = this
-    
+
     var filterClause = ''
     const hasListNameInConfig = (config.listName !== undefined && config.listName !== '')
-    // filter by displayName, otherwise, get all the lists    
+    // filter by displayName, otherwise, get all the lists
     if (hasListNameInConfig) {
       // Get the list ID based on name
       filterClause = `displayName eq '${config.listName}'`
     }
 
-    filterClause = encodeURIComponent(filterClause).replaceAll("'", "%27")
+    filterClause = encodeURIComponent(filterClause).replaceAll("'", '%27')
 
     var filter = ''
     if (filterClause !== '') {
@@ -110,31 +110,27 @@ module.exports = NodeHelper.create({
       .then((response) => response.json())
       .then(self.checkBodyError)
       .then((responseData) => {
-
         var listIds = []
         if (config.plannedTasks.enable) {
           //  Filter out any lists that are in the `ignoreLists` collection
           listIds = responseData.value
             .filter(list => config.plannedTasks.ignoreLists.findIndex((ignore) => ignore === list.displayName) === -1)
             .map((list) => list.id)
-        }
-        else if (responseData.value.length > 0) {
+        } else if (responseData.value.length > 0) {
           if (!hasListNameInConfig) {
             // If there is no list name in the config and it's not showPlannedTasks, get the default list
             const list = responseData.value.find((element) => element.wellknownListName === 'defaultList')
             if (list) {
               listIds.push(list.id)
             }
-          }
-          else {
+          } else {
             listIds.push(responseData.value[0].id)
           }
         }
 
         if (listIds.length > 0) {
           self.getTasks(accessToken, config, listIds)
-        }
-        else {
+        } else {
           self.logError(`FETCH_INFO_ERROR_${config.id}`, { error: `"${config.listName}" task folder not found`, errorDescription: `The task folder "${config.listName}" could not be found.` })
         }
       }) // function callback for task folders
@@ -145,63 +141,79 @@ module.exports = NodeHelper.create({
   },
   getTasks: function (accessToken, config, listIds) {
     const self = this
-
+    const formatString = "yyyy-MM-dd'T'HH:mm:ss.SSSS"
     Log.info(`[MMM-MicrosoftToDo] - Retrieving Tasks for ${listIds.length} list(s)`)
 
-    // TODO: Iterate through ALL the lists.  If showplannedtasks, filter out those without 
+    // TODO: Iterate through ALL the lists.  If showplannedtasks, filter out those without
     var promises = listIds.map((listId) => {
       var orderBy = (config.orderBy === 'subject' ? '&$orderby=title' : '') + (config.orderBy === 'dueDate' ? '&$orderby=duedatetime/datetime' : '')
       var filterClause = "status ne 'completed'"
       if (config.plannedTasks.enable) {
-          var pastDate = formatISO(add(Date.now(), config.plannedTasks.duration))
-          filterClause += ` and duedatetime/datetime lt '${pastDate}' and duedatetime/datetime ne null`
+        var pastDate = formatISO(add(Date.now(), config.plannedTasks.duration))
+        filterClause += ` and duedatetime/datetime lt '${pastDate}' and duedatetime/datetime ne null`
       }
-      
-      filterClause = encodeURIComponent(filterClause).replaceAll("'", "%27")      
+
+      filterClause = encodeURIComponent(filterClause).replaceAll("'", '%27')
       var listUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/${listId}/tasks?$top=${config.itemLimit}&$filter=${filterClause}${orderBy}`
       Log.debug(`[MMM-MicrosoftToDo] - Retrieving Tasks ${listUrl}`)
       return fetch(listUrl, {
         method: 'get',
         headers: {
           Authorization: `Bearer ${accessToken}`
-        }}).then(self.checkFetchStatus)
+        }
+      }).then(self.checkFetchStatus)
         .then((response) => response.json())
         .then(self.checkBodyError)
         .then((responseData) => {
           var tasks = []
           if (responseData.value !== null && responseData.value !== undefined && responseData.value.length > 0) {
-              var tasks = responseData.value.map((element) => {
+            tasks = responseData.value.map((element) => {
+              var parsedDate
+              if (element.dueDateTime !== undefined) {
+                parsedDate = parse(element.dueDateTime.dateTime, formatString)
+              }
               return {
                 id: element.id,
                 title: element.title,
                 dueDateTime: element.dueDateTime,
-                listId: config._listId
+                listId: config._listId,
+                parsedDate: parsedDate
               }
             })
           }
           return tasks
-          
         }) // function callback for task folders
         .catch(self.logError)
     })
 
-    
     Log.debug(`[MMM-MicrosoftToDo] - waiting on ${promises.length} promises`)
     Promise.all(promises).then((taskArray) => {
-      let returnTasks = []
+      const returnTasks = []
       taskArray.forEach(element => {
-        if (element !== null && element != undefined && element.length > 0)
-        {
+        if (element !== null && element !== undefined && element.length > 0) {
           element.forEach((task) => returnTasks.push(task))
         }
-      });
+      })
+
+      returnTasks.sort(self.taskSortCompare)
+
       Log.info(`[MMM-MicrosoftToDo] - returning ${returnTasks.length} tasks`)
       self.sendSocketNotification(`DATA_FETCHED_${config.id}`, returnTasks)
     }).catch((error) => {
       Log.info(`[MMM-MicrosoftToDo] - error ${error}`)
     }
-    );
+    )
   },
+  taskSortCompare: function (firstTask, secondTask) {
+    if (firstTask.parsedDate === undefined) {
+      return 1
+    }
+    if (secondTask.parsedDate === undefined) {
+      return -1
+    }
+    return compareAsc(firstTask.parsedDate, secondTask.parsedDate)
+  },
+
   checkFetchStatus: function (response) {
     if (response.ok) {
       return response
