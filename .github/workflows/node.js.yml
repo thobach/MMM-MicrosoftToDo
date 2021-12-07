@@ -44,4 +44,5 @@ jobs:
       - name: Run tests
         run: |
           cd MagicMirror/modules/MMM-MicrosoftToDo
+          npm ci
           npm run test
