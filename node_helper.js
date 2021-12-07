@@ -12,7 +12,7 @@ const Log = require('logger')
 module.exports = NodeHelper.create({
 
   start: function () {
-    console.log(this.name + ' helper started ...')
+    Log.info(`${this.name} node_helper started ...`)
   },
 
   socketNotificationReceived: function (notification, payload) {
@@ -21,7 +21,7 @@ module.exports = NodeHelper.create({
     } else if (notification === 'COMPLETE_TASK') {
       this.completeTask(payload.listId, payload.taskId, payload.config)
     } else {
-      console.log(this.name + ' - Did not process event: ' + notification)
+      Log.info(`${this.name} - did not process event: ${notification}`)
     }
   },
 
@@ -29,7 +29,7 @@ module.exports = NodeHelper.create({
     // copy context to be available inside callbacks
     const self = this
 
-    var patchUrl = `https://graph.microsoft.com/v1.0/me/lists/${listId}/tasks/${taskId}`;
+    var patchUrl = `https://graph.microsoft.com/v1.0/me/lists/${listId}/tasks/${taskId}`
 
     const updateBody = {
       id: taskId,
@@ -41,18 +41,20 @@ module.exports = NodeHelper.create({
       body: JSON.stringify(updateBody),
       headers: {
         'Content-Type': 'application/json',
-        Authentication: 'Bearer ' + self.accessToken
+        Authentication: `Bearer ${self.accessToken}`
       }
     }).then(self.checkFetchStatus)
-      .then((response) => {
-        self.sendSocketNotification('TASK_COMPLETED_' + config.id)
+      .then((response) => response.json())
+      .then(self.checkBodyError)
+      .then((responseJson) => {
+        self.sendSocketNotification(`TASK_COMPLETED_${config.id}`, responseJson)
       })
-      .error((error) => self.logError("COMPLETE_TASK_ERROR", error));
+      .error((error) => self.logError('COMPLETE_TASK_ERROR', error))
   },
 
   getTodos: function (config) {
     // copy context to be available inside callbacks
-    let self = this
+    const self = this
 
     // get access token
     var tokenUrl = 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
@@ -75,9 +77,9 @@ module.exports = NodeHelper.create({
         self.accessToken = accessToken
         self.fetchList(accessToken, config)
       })
-      .catch((error) => { 
-        self.logError('FETCH_INFO_ERROR_' + config.id, error)
-      });
+      .catch((error) => {
+        self.logError(`FETCH_INFO_ERROR_${config.id}`, error)
+      })
   },
   fetchList: function (accessToken, config) {
     const self = this
@@ -98,7 +100,7 @@ module.exports = NodeHelper.create({
         } else if (config.listId !== undefined && config.listId !== '') {
           // if list ID was provided copy it to internal list ID config and show deprecation warning
           config._listId = config.listId
-          console.warn(self.name + ' - Warning, configuration parameter listId is deprecated, please use listName instead, otherwise the module will not work anymore in the future.')
+          Log.warn(`${self.name} - configuration parameter listId is deprecated, please use listName instead, otherwise the module will not work anymore in the future.`)
           // TODO: during the next release uncomment the following line to not show the todo list, but the error message instead
           // self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, {
           // error: 'Config param "listId" is deprecated, use "listName" instead',
@@ -113,11 +115,11 @@ module.exports = NodeHelper.create({
           // based on translated configuration data (listName -> listId), get tasks
           self.getTasks(accessToken, config, config._listId)
         } else {
-          self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: '"' + config.listName + '" task folder not found', errorDescription: 'The task folder "' + config.listName + '" could not be found.' })
-          console.error(self.name + ' - Error while requesting task folders: Could not find task folder ID for task folder name "' + config.listName + '", or could not find default folder in case no task folder name was provided.')
+          self.sendSocketNotification(`FETCH_INFO_ERROR_${config.id}`, { error: `"${config.listName}" task folder not found`, errorDescription: `The task folder "${config.listName}" could not be found.` })
+          Log.error(`${self.name} - Error while requesting task folders: Could not find task folder ID for task folder name "${config.listName}", or could not find default folder in case no task folder name was provided.`)
         }
       }) // function callback for task folders
-      .catch(error => self.logError('FETCH_INFO_ERROR_' + config.id, error));
+      .catch(error => self.logError(`FETCH_INFO_ERROR_${config.id}`, error))
   },
   fetchData: function (config) {
     this.getTodos(config)
@@ -125,12 +127,13 @@ module.exports = NodeHelper.create({
   getTasks: function (accessToken, config) {
     const self = this
     var orderBy = (config.orderBy === 'subject' ? '&$orderby=title' : '') + (config.orderBy === 'dueDate' ? '&$orderby=duedatetime/datetime' : '')
-    var listUrl = 'https://graph.microsoft.com/v1.0/me/todo/lists/' + config._listId + '/tasks?$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27%20and%20duedatetime%2Fdatetime%20gt%20%272021-12-01T00%3A00%3A00%27' + orderBy
+    var filterClause = 'status%20ne%20%27completed%27%20and%20duedatetime%2Fdatetime%20gt%20%272021-12-01T00%3A00%3A00%27'
+    var listUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/${config._listId}/tasks?$top=${config.itemLimit}&$filter=${filterClause}${orderBy}`
 
     fetch(listUrl, {
       method: 'get',
       headers: {
-        Authorization: 'Bearer ' + accessToken
+        Authorization: `Bearer ${accessToken}`
       }
     }).then(self.checkFetchStatus)
       .then((response) => response.json())
@@ -143,14 +146,14 @@ module.exports = NodeHelper.create({
             dueDateTime: element.dueDateTime,
             listId: config._listId
           }
-        } ) ;
+        })
 
-        self.sendSocketNotification('DATA_FETCHED_' + config.id, tasks)
+        self.sendSocketNotification(`DATA_FETCHED_${config.id}`, tasks)
       }) // function callback for task folders
       .catch(self.logError)
   },
   checkFetchStatus: function (response) {
-    if (response.ok) {    
+    if (response.ok) {
       return response
     } else {
       throw Error(response.statusText)
@@ -158,12 +161,12 @@ module.exports = NodeHelper.create({
   },
   checkBodyError: function (json) {
     if (json && json.error) {
-      throw Error(json.error);
+      throw Error(json.error)
     }
-    return json;
+    return json
   },
   logError: function (notificationName, error) {
-    Log.error('[MMM-MicrosoftToDo] - Error fetching access token:' + error);
-    this.sendSocketNotification(notificationName, error);
+    Log.error(`[MMM-MicrosoftToDo] - Error fetching access token: ${error}`)
+    this.sendSocketNotification(notificationName, error)
   }
 })
