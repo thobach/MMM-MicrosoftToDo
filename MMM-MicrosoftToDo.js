@@ -132,6 +132,8 @@ Module.register('MMM-MicrosoftToDo', {
 
   validateConfig: function() {
 
+    var self = this;
+
     // in case there are multiple instances of this module, ensure the responses from node_helper are mapped to the correct module
     self.config.id = this.identifier
 
@@ -173,6 +175,22 @@ Module.register('MMM-MicrosoftToDo', {
     // set default refresh interval to 60s
     if (self.config.refreshSeconds === undefined) {
       self.config.refreshSeconds = 60
+    }
+
+    if (self.config.plannedTasks === undefined) {
+      self.config.plannedTasks = {
+        enable: false
+      }
+    }
+
+    if (self.config.plannedTasks.ignoreLists === undefined) {
+      self.config.plannedTasks.ignoreLists = []
+    }
+
+    if (self.config.plannedTasks.duration === undefined) {
+      self.config.plannedTasks.duration = {
+        weeks: 2
+      }
     }
 
     if (self.config.listId !== undefined) {

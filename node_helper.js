@@ -8,7 +8,7 @@
 var NodeHelper = require('node_helper')
 const fetch = require('node-fetch')
 const Log = require('logger')
-
+const { add, formatISO } = require("date-fns");
 module.exports = NodeHelper.create({
 
   start: function () {
@@ -21,7 +21,7 @@ module.exports = NodeHelper.create({
     } else if (notification === 'COMPLETE_TASK') {
       this.completeTask(payload.listId, payload.taskId, payload.config)
     } else {
-      Log.info(`${this.name} - did not process event: ${notification}`)
+      Log.warn(`${this.name} - did not process event: ${notification}`)
     }
   },
 
@@ -84,15 +84,23 @@ module.exports = NodeHelper.create({
   fetchList: function (accessToken, config) {
     const self = this
     
-    var filterClause = "wellknownListName eq 'defaultList'";
-    if (config.listName !== undefined && config.listName !== '') {
+    var filterClause = ''
+    const hasListNameInConfig = (config.listName !== undefined && config.listName !== '')
+    // filter by displayName, otherwise, get all the lists    
+    if (hasListNameInConfig) {
+      // Get the list ID based on name
       filterClause = `displayName eq '${config.listName}'`
     }
-    
-    filterClause = encodeURIComponent(filterClause)
+
+    filterClause = encodeURIComponent(filterClause).replaceAll("'", "%27")
+
+    var filter = ''
+    if (filterClause !== '') {
+      filter = `&$filter=${filterClause}`
+    }
 
     // get ID of task folder
-    var getListUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/?$top=200&$filter=${filterClause}`
+    var getListUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/?$top=200${filter}`
     fetch(getListUrl, {
       method: 'get',
       headers: {
@@ -103,9 +111,28 @@ module.exports = NodeHelper.create({
       .then(self.checkBodyError)
       .then((responseData) => {
 
-        if (responseData.value.length > 0) {
-          config._listId = responseData.value.id
-          self.getTasks(accessToken, config, config._listId)
+        var listIds = []
+        if (config.plannedTasks.enable) {
+          //  Filter out any lists that are in the `ignoreLists` collection
+          listIds = responseData.value
+            .filter(list => config.plannedTasks.ignoreLists.findIndex((ignore) => ignore === list.displayName) === -1)
+            .map((list) => list.id)
+        }
+        else if (responseData.value.length > 0) {
+          if (!hasListNameInConfig) {
+            // If there is no list name in the config and it's not showPlannedTasks, get the default list
+            const list = responseData.value.find((element) => element.wellknownListName === 'defaultList')
+            if (list) {
+              listIds.push(list.id)
+            }
+          }
+          else {
+            listIds.push(responseData.value[0].id)
+          }
+        }
+
+        if (listIds.length > 0) {
+          self.getTasks(accessToken, config, listIds)
         }
         else {
           self.logError(`FETCH_INFO_ERROR_${config.id}`, { error: `"${config.listName}" task folder not found`, errorDescription: `The task folder "${config.listName}" could not be found.` })
@@ -116,33 +143,64 @@ module.exports = NodeHelper.create({
   fetchData: function (config) {
     this.getTodos(config)
   },
-  getTasks: function (accessToken, config) {
+  getTasks: function (accessToken, config, listIds) {
     const self = this
-    var orderBy = (config.orderBy === 'subject' ? '&$orderby=title' : '') + (config.orderBy === 'dueDate' ? '&$orderby=duedatetime/datetime' : '')
-    var filterClause = 'status%20ne%20%27completed%27%20and%20duedatetime%2Fdatetime%20gt%20%272021-12-01T00%3A00%3A00%27'
-    var listUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/${config._listId}/tasks?$top=${config.itemLimit}&$filter=${filterClause}${orderBy}`
 
-    fetch(listUrl, {
-      method: 'get',
-      headers: {
-        Authorization: `Bearer ${accessToken}`
+    Log.info(`[MMM-MicrosoftToDo] - Retrieving Tasks for ${listIds.length} list(s)`)
+
+    // TODO: Iterate through ALL the lists.  If showplannedtasks, filter out those without 
+    var promises = listIds.map((listId) => {
+      var orderBy = (config.orderBy === 'subject' ? '&$orderby=title' : '') + (config.orderBy === 'dueDate' ? '&$orderby=duedatetime/datetime' : '')
+      var filterClause = "status ne 'completed'"
+      if (config.plannedTasks.enable) {
+          var pastDate = formatISO(add(Date.now(), config.plannedTasks.duration))
+          filterClause += ` and duedatetime/datetime lt '${pastDate}' and duedatetime/datetime ne null`
       }
-    }).then(self.checkFetchStatus)
-      .then((response) => response.json())
-      .then(self.checkBodyError)
-      .then((responseData) => {
-        var tasks = responseData.value.map((element) => {
-          return {
-            id: element.id,
-            title: element.title,
-            dueDateTime: element.dueDateTime,
-            listId: config._listId
+      
+      filterClause = encodeURIComponent(filterClause).replaceAll("'", "%27")      
+      var listUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/${listId}/tasks?$top=${config.itemLimit}&$filter=${filterClause}${orderBy}`
+      Log.debug(`[MMM-MicrosoftToDo] - Retrieving Tasks ${listUrl}`)
+      return fetch(listUrl, {
+        method: 'get',
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }}).then(self.checkFetchStatus)
+        .then((response) => response.json())
+        .then(self.checkBodyError)
+        .then((responseData) => {
+          var tasks = []
+          if (responseData.value !== null && responseData.value !== undefined && responseData.value.length > 0) {
+              var tasks = responseData.value.map((element) => {
+              return {
+                id: element.id,
+                title: element.title,
+                dueDateTime: element.dueDateTime,
+                listId: config._listId
+              }
+            })
           }
-        })
+          return tasks
+          
+        }) // function callback for task folders
+        .catch(self.logError)
+    })
 
-        self.sendSocketNotification(`DATA_FETCHED_${config.id}`, tasks)
-      }) // function callback for task folders
-      .catch(self.logError)
+    
+    Log.debug(`[MMM-MicrosoftToDo] - waiting on ${promises.length} promises`)
+    Promise.all(promises).then((taskArray) => {
+      let returnTasks = []
+      taskArray.forEach(element => {
+        if (element !== null && element != undefined && element.length > 0)
+        {
+          element.forEach((task) => returnTasks.push(task))
+        }
+      });
+      Log.info(`[MMM-MicrosoftToDo] - returning ${returnTasks.length} tasks`)
+      self.sendSocketNotification(`DATA_FETCHED_${config.id}`, returnTasks)
+    }).catch((error) => {
+      Log.info(`[MMM-MicrosoftToDo] - error ${error}`)
+    }
+    );
   },
   checkFetchStatus: function (response) {
     if (response.ok) {
@@ -158,7 +216,7 @@ module.exports = NodeHelper.create({
     return json
   },
   logError: function (notificationName, error) {
-    Log.error(`[MMM-MicrosoftToDo] - Error fetching access token: ${error}`)
-    this.sendSocketNotification(notificationName, error)
+    Log.error(`[MMM-MicrosoftToDo]: ${JSON.stringify(error)}`)
+    self.sendSocketNotification(notificationName, error)
   }
 })
