@@ -4,8 +4,9 @@
   "description": "MMM-MicrosoftToDo is a 3rd party module for MagicMirror (https://github.com/MichMich/MagicMirror) that shows open tasks from task lists. The tasks are retrieved from the Microsoft To Do / Outlook (https://todo.microsoft.com).",
   "main": "node_helper.js",
   "scripts": {
-    "test": "npm run test:js",
-    "test:js": "eslint *.js --config .eslintrc.json",
+    "test": "npm run test:prettier && npm run test:lint",
+    "test:lint": "eslint *.js --config .eslintrc.json",
+    "test:prettier": "prettier --check **/*.{js,css,json,md,yml}",
     "lint:prettier": "prettier --write **/*.{js,css,json,md,yml}",
     "lint:js": "eslint *.js --config .eslintrc.json --fix"
   },
