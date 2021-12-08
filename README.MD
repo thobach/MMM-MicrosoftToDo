@@ -118,7 +118,7 @@ When enabled, the `listName` parameter is ignored, and tasks are retrieved from 
 * Task DueDate is set
 * Task Due date is less than the current date + the configured duration. 
 
-In other words, if you just enable the Planned Tasks configuration, the default values for `duration` and `ignoreLists` will take tasks from all lists which are not completed and have a due date less than 2 weeks from today.  That will include any tasks that are overdue.
+In other words, if you just enable the Planned Tasks configuration, the default values for `duration` and `includedLists` will take tasks from all lists which are not completed and have a due date less than 2 weeks from today.  That will include any tasks that are overdue.
 
 ### Example
 ```
@@ -135,7 +135,7 @@ In other words, if you just enable the Planned Tasks configuration, the default 
       duration: {
         weeks: 2
       },
-      ignoreLists: [ "Legal" ] // string array with display names of lists to ignore
+      includedLists: [ "Legal" ] // string array with display names of lists to ignore
     }
   }
 }

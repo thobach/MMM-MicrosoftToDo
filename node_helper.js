@@ -8,7 +8,7 @@
 var NodeHelper = require("node_helper");
 const fetch = require("node-fetch");
 const Log = require("logger");
-const { add, formatISO, compareAsc, parse } = require("date-fns");
+const { add, formatISO, compareAsc, parseISO } = require("date-fns");
 module.exports = NodeHelper.create({
   start: function () {
     Log.info(`${this.name} node_helper started ...`);
@@ -52,7 +52,7 @@ module.exports = NodeHelper.create({
           responseJson
         );
       })
-      .error((error) => self.logError("COMPLETE_TASK_ERROR", error));
+      .error((error) => self.logError(error));
   },
 
   getTodos: function (config) {
@@ -86,7 +86,7 @@ module.exports = NodeHelper.create({
         self.fetchList(accessToken, config);
       })
       .catch((error) => {
-        self.logError(`FETCH_INFO_ERROR_${config.id}`, error);
+        self.logError(error);
       });
   },
   fetchList: function (accessToken, config) {
@@ -122,13 +122,13 @@ module.exports = NodeHelper.create({
       .then((responseData) => {
         var listIds = [];
         if (config.plannedTasks.enable) {
-          //  Filter out any lists that are in the `ignoreLists` collection
+          //  Filter out any lists that are in the `includedLists` collection
           listIds = responseData.value
             .filter(
               (list) =>
-                config.plannedTasks.ignoreLists.findIndex(
-                  (ignore) => ignore === list.displayName
-                ) === -1
+                config.plannedTasks.includedLists.findIndex(
+                  (include) => list.displayName.match(include) !== null
+                ) !== -1
             )
             .map((list) => list.id);
         } else if (responseData.value.length > 0) {
@@ -148,26 +148,26 @@ module.exports = NodeHelper.create({
         if (listIds.length > 0) {
           self.getTasks(accessToken, config, listIds);
         } else {
-          self.logError(`FETCH_INFO_ERROR_${config.id}`, {
+          self.logError({
             error: `"${config.listName}" task folder not found`,
             errorDescription: `The task folder "${config.listName}" could not be found.`
           });
         }
       }) // function callback for task folders
-      .catch((error) => self.logError(`FETCH_INFO_ERROR_${config.id}`, error));
+      .catch((error) => self.logError(error));
   },
   fetchData: function (config) {
     this.getTodos(config);
   },
   getTasks: function (accessToken, config, listIds) {
     const self = this;
-    const formatString = "yyyy-MM-dd'T'HH:mm:ss.SSSS";
     Log.info(
       `[MMM-MicrosoftToDo] - Retrieving Tasks for ${listIds.length} list(s)`
     );
 
     // TODO: Iterate through ALL the lists.  If showplannedtasks, filter out those without
     var promises = listIds.map((listId) => {
+      const promiseSelf = self;
       var orderBy =
         (config.orderBy === "subject" ? "&$orderby=title" : "") +
         (config.orderBy === "dueDate" ? "&$orderby=duedatetime/datetime" : "");
@@ -186,9 +186,9 @@ module.exports = NodeHelper.create({
           Authorization: `Bearer ${accessToken}`
         }
       })
-        .then(self.checkFetchStatus)
+        .then(promiseSelf.checkFetchStatus)
         .then((response) => response.json())
-        .then(self.checkBodyError)
+        .then(promiseSelf.checkBodyError)
         .then((responseData) => {
           var tasks = [];
           if (
@@ -198,8 +198,8 @@ module.exports = NodeHelper.create({
           ) {
             tasks = responseData.value.map((element) => {
               var parsedDate;
-              if (element.dueDateTime !== undefined) {
-                parsedDate = parse(element.dueDateTime.dateTime, formatString);
+              if (element !== undefined && element.dueDateTime !== undefined) {
+                parsedDate = parseISO(element.dueDateTime.dateTime);
               }
               return {
                 id: element.id,
@@ -212,13 +212,16 @@ module.exports = NodeHelper.create({
           }
           return tasks;
         }) // function callback for task folders
-        .catch(self.logError);
+        .catch(promiseSelf.logError);
     });
 
     Log.debug(`[MMM-MicrosoftToDo] - waiting on ${promises.length} promises`);
     Promise.all(promises)
       .then((taskArray) => {
-        const returnTasks = [];
+        Log.debug(
+          `[MMM-MicrosoftToDo] - processing ${taskArray.length} return values`
+        );
+        var returnTasks = [];
         taskArray.forEach((element) => {
           if (element !== null && element !== undefined && element.length > 0) {
             element.forEach((task) => returnTasks.push(task));
@@ -226,13 +229,16 @@ module.exports = NodeHelper.create({
         });
 
         returnTasks.sort(self.taskSortCompare);
+        if (returnTasks.length > config.itemLimit) {
+          returnTasks = returnTasks.slice(0, config.itemLimit - 1);
+        }
 
-        Log.info(`[MMM-MicrosoftToDo] - returning ${returnTasks.length} tasks`);
+        Log.debug(
+          `[MMM-MicrosoftToDo] - returning ${returnTasks.length} tasks`
+        );
         self.sendSocketNotification(`DATA_FETCHED_${config.id}`, returnTasks);
       })
-      .catch((error) => {
-        Log.info(`[MMM-MicrosoftToDo] - error ${error}`);
-      });
+      .catch(self.logError);
   },
   taskSortCompare: function (firstTask, secondTask) {
     if (firstTask.parsedDate === undefined) {
@@ -257,8 +263,13 @@ module.exports = NodeHelper.create({
     }
     return json;
   },
-  logError: function (notificationName, error) {
-    Log.error(`[MMM-MicrosoftToDo]: ${JSON.stringify(error)}`);
-    self.sendSocketNotification(notificationName, error);
+  logError: function (error) {
+    const jsonError = JSON.stringify(error);
+
+    if (jsonError) {
+      Log.error(`[MMM-MicrosoftToDo]: ${jsonError}`);
+    } else {
+      Log.error(`[MMM-MicrosoftToDo]: ${error}`);
+    }
   }
 });

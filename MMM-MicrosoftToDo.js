@@ -33,7 +33,7 @@ Module.register("MMM-MicrosoftToDo", {
             .utc(taskDue[0])
             .tz(Intl.DateTimeFormat().resolvedOptions().timeZone);
           if (self.config.useRelativeDate) {
-            taskDue = taskDueDate.fromNow();
+            taskDue = `${taskDueDate.fromNow()} - `;
           } else {
             taskDue = taskDueDate.format(self.config.dateFormat);
           }
@@ -61,7 +61,7 @@ Module.register("MMM-MicrosoftToDo", {
         }
 
         var listItemText = document.createTextNode(
-          checkbox + taskDue + element.title
+          `${checkbox}${taskDue}${element.title}`
         );
         listItem.appendChild(listItemText);
         // complete task when clicked on it
@@ -212,8 +212,8 @@ Module.register("MMM-MicrosoftToDo", {
     }
 
     // By default, don't ignore any lists
-    if (self.config.plannedTasks.ignoreLists === undefined) {
-      self.config.plannedTasks.ignoreLists = [];
+    if (self.config.plannedTasks.includedLists === undefined) {
+      self.config.plannedTasks.includedLists = [".*"];
     }
 
     // by default, only look at tasks 2 weeks out
