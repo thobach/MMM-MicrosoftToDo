@@ -123,22 +123,22 @@ In other words, if you just enable the Planned Tasks configuration, the default 
 ### Example
 ```
 {
-			module: 'MMM-MicrosoftToDo',
-			position: 'bottom_left',	// This can be any of the regions. Best results in left or right regions.
-			header: 'Planned Tasks', // This is optional
-			config: {
-			  oauth2ClientSecret: 'yourClientSecret',
-			  oauth2RefreshToken: 'yourRefreshToken',
-			  oauth2ClientId: 'yourClientId',
-			  plannedTasks: {
-				  enable: true,
-				  duration: {
-					  weeks: 2
-				  },
-				  ignoreLists: [ "Legal" ] // string array with display names of lists to ignore
-			  }
-			}
-		}
+  module: 'MMM-MicrosoftToDo',
+  position: 'bottom_left',	// This can be any of the regions. Best results in left or right regions.
+  header: 'Planned Tasks', // This is optional
+  config: {
+    oauth2ClientSecret: 'yourClientSecret',
+    oauth2RefreshToken: 'yourRefreshToken',
+    oauth2ClientId: 'yourClientId',
+    plannedTasks: {
+      enable: true,
+      duration: {
+        weeks: 2
+      },
+      ignoreLists: [ "Legal" ] // string array with display names of lists to ignore
+    }
+  }
+}
 ```
 
 ### `plannedTasks` options
