@@ -135,7 +135,7 @@ In other words, if you just enable the Planned Tasks configuration, the default 
       duration: {
         weeks: 2
       },
-      includedLists: [ "Legal" ] // string array with display names of lists to ignore
+      includedLists: [ "Legal" ] // string array with regular expression patterns.  If a list's displayName matches one of the patterns, it's included
     }
   }
 }
@@ -146,7 +146,8 @@ In other words, if you just enable the Planned Tasks configuration, the default 
 | Option Name | Type    | Description | Default Value |
 | ----------- | ----    | ----------  | ------------- |
 | enable      | `bool`  |             | `false`       |
-| duration    | `object`| A duration object, as defined in the [date-fns add]() function.  | `{ weeks: 2}` |
-| ignoredLists| `string[]`| A string list with the display name of the ToDo list to be ignored | `[]` |
+| duration    | `object`| A duration object, as defined in the [date-fns add](https://date-fns.org/v2.27.0/docs/add) function.  | `{ weeks: 2}` |
+| includedLists | `string[]`| A string list a collection of RegExp patterns.  If a list's `displayName` matches one of the [RegEx](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp) patterns, it's included | `[ '.*' ]` |
 
-
+### Why "Include" instead of "Ignore"?
+Microsoft will throttle the number of calls you can make to its APIs, and, the current ToDo API does not allow you to query for tasks across all lists.  Therefore, an API call must be made for each list.  We have noticed throttling during testing with as few as 15 lists, so it is wise to limit the lists you choose to include.  While the default will attempt to use all lists, it's advisable to limit yourself to less than 10 to prevent throttling.
