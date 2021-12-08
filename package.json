@@ -6,6 +6,7 @@
   "scripts": {
     "test": "npm run test:js",
     "test:js": "eslint *.js --config .eslintrc.json",
+    "lint:prettier": "prettier --write **/*.{js,css,json,md,yml}",
     "lint:js": "eslint *.js --config .eslintrc.json --fix"
   },
   "repository": {
@@ -31,12 +32,15 @@
     "requests": "^0.3.0"
   },
   "devDependencies": {
-    "eslint": "^6.8.0",
+    "eslint": "^7.24.0",
+    "eslint-config-prettier": "^8.1.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-security": "^1.4.0",
-    "eslint-plugin-standard": "^4.0.1"
+    "eslint-plugin-standard": "^4.0.1",
+    "prettier": "^2.2.1"
   }
 }
