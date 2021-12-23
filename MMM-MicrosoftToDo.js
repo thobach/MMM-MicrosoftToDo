@@ -2,13 +2,41 @@
 global Module, Log, moment
 */
 Module.register("MMM-MicrosoftToDo", {
+  // Module config defaults.           // Make all changes in your config.js file
+  defaults: {
+    oauth2ClientSecret: "",
+    oauth2RefreshToken: "",
+    oauth2ClientId: "",
+    orderBy: "dueDate",
+    hideIfEmpty: false,
+    showCheckbox: true,
+    maxWidth: 450,
+    itemLimit: 200,
+    completeOnClick: false,
+    showDueDate: false,
+    dateFormat: "ddd MMM Do [ - ]",
+    refreshSeconds: 60,
+    fade: false,
+    fadePoint: 0.5,
+    useRelativeDate: false,
+    plannedTasks: {
+      enable: false,
+      includedLists: [".*"],
+      duration: {
+        weeks: 2
+      }
+    },
+    colorDueDate: false
+  },
+
+  getStyles: function () {
+    return ["MMM-MicrosoftToDo.css"];
+  },
+
   // Override dom generator.
   getDom: function () {
     // copy module object to be accessible in callbacks
     var self = this;
-
-    // checkbox icon is added based on configuration
-    var checkbox = this.config.showCheckbox ? "▢ " : "";
 
     // styled wrapper of the todo list
     var listWrapper = document.createElement("ul");
@@ -25,19 +53,51 @@ Module.register("MMM-MicrosoftToDo", {
       this.list.forEach(function (element) {
         // Get due date array
         var taskDue = "";
+
+        var listSpan = document.createElement("span");
+        if (self.config.showCheckbox) {
+          listSpan.append(document.createTextNode("▢ "));
+        }
+
         if (self.config.showDueDate === true && element.dueDateTime != null) {
           // timezone is returned as UTC
           taskDue = Object.values(element.dueDateTime);
           // converting time zone to browser provided timezone and formatting time according to configuration
           var taskDueDate = moment
             .utc(taskDue[0])
-            .tz(Intl.DateTimeFormat().resolvedOptions().timeZone);
+            .tz(Intl.DateTimeFormat().resolvedOptions().timeZone)
+            .add(1, "d"); // Due date in Task defaults to midnight on the day, so add a day to shift due date to midnight the next day
+
+          var classNames = ["mmm-task-due-date"];
+          if (self.config.colorDueDate) {
+            const now = moment();
+            const next24 = moment().add(1, "d");
+            // overdue
+            if (taskDueDate.isBefore(now)) {
+              classNames.push("overdue");
+            }
+
+            // due in the next day
+            if (taskDueDate.isBetween(now, next24)) {
+              classNames.push("soon");
+            }
+
+            if (taskDueDate.isAfter(next24)) {
+              classNames.push("upcoming");
+            }
+          }
           if (self.config.useRelativeDate) {
             taskDue = `${taskDueDate.fromNow()} - `;
           } else {
             taskDue = taskDueDate.format(self.config.dateFormat);
           }
+          var taskText = document.createElement("i");
+          taskText.innerText = taskDue;
+          taskText.className = classNames.join(" ");
+
+          listSpan.append(taskText);
         }
+
         var listItem = document.createElement("li");
         listItem.style.listStylePosition = "inside";
         listItem.style.whiteSpace = "nowrap";
@@ -60,10 +120,9 @@ Module.register("MMM-MicrosoftToDo", {
           }
         }
 
-        var listItemText = document.createTextNode(
-          `${checkbox}${taskDue}${element.title}`
-        );
-        listItem.appendChild(listItemText);
+        listSpan.append(document.createTextNode(element.title));
+
+        listItem.appendChild(listSpan);
         // complete task when clicked on it
         if (self.config.completeOnClick) {
           listItem.onclick = function () {
@@ -158,70 +217,6 @@ Module.register("MMM-MicrosoftToDo", {
 
     // in case there are multiple instances of this module, ensure the responses from node_helper are mapped to the correct module
     self.config.id = this.identifier;
-
-    // decide if a module should be shown if todo list is empty
-    if (self.config.hideIfEmpty === undefined) {
-      self.config.hideIfEmpty = false;
-    }
-
-    // decide if a checkbox icon should be shown in front of each todo list item
-    if (self.config.showCheckbox === undefined) {
-      self.config.showCheckbox = true;
-    }
-
-    // set default max module width
-    if (self.config.maxWidth === undefined) {
-      self.config.maxWidth = "450px";
-    }
-
-    // set default limit for number of tasks to be shown
-    if (self.config.itemLimit === undefined) {
-      self.config.itemLimit = "200";
-    }
-
-    // set default task completion on click to false
-    if (self.config.completeOnClick === undefined) {
-      self.config.completeOnClick = false;
-    }
-
-    // decide if the task due date should be shown in front of each todo list item, if it exists
-    if (self.config.showDueDate === undefined) {
-      self.config.showDueDate = false;
-    }
-
-    // format to display the due date
-    if (self.config.dateFormat === undefined) {
-      self.config.dateFormat = "ddd MMM Do [ - ]";
-    }
-
-    // set default refresh interval to 60s
-    if (self.config.refreshSeconds === undefined) {
-      self.config.refreshSeconds = 60;
-    }
-
-    // set default useRelativeDate to false
-    if (self.config.useRelativeDate === undefined) {
-      self.config.useRelativeDate = false;
-    }
-
-    // set default plannedTasks settings
-    if (self.config.plannedTasks === undefined) {
-      self.config.plannedTasks = {
-        enable: false
-      };
-    }
-
-    // By default, don't ignore any lists
-    if (self.config.plannedTasks.includedLists === undefined) {
-      self.config.plannedTasks.includedLists = [".*"];
-    }
-
-    // by default, only look at tasks 2 weeks out
-    if (self.config.plannedTasks.duration === undefined) {
-      self.config.plannedTasks.duration = {
-        weeks: 2
-      };
-    }
 
     if (self.config.listId !== undefined) {
       Log.error(

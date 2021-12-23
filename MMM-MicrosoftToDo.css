@@ -1,0 +1,15 @@
+.mmm-task-due-date {
+  font-style: normal;
+}
+
+.mmm-task-due-date.overdue {
+  color: red;
+}
+
+.mmm-task-due-date.soon {
+  color: orange;
+}
+
+.mmm-task-due-date.upcoming {
+  color: green;
+}
