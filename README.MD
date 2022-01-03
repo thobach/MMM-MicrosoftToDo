@@ -79,7 +79,8 @@ from the full response
 
 ## Installation
 1. Navigate into your MagicMirror's `modules` folder and execute `git clone https://github.com/thobach/MMM-MicrosoftToDo.git`.
-2. In order to load the MMM-MicrosoftToDo module you will need to add the following configuration to your `config/config.js` file. As `oauth2ClientSecret` you need to provide Client Secret from above, as `oauth2RefreshToken` you set the Refresh Token, as `oauth2ClientId` you set the Client ID and as `listName` you set the exact name of the task list, or leave it blank to show items from the default "Tasks" list.
+2. Install dependencies via: cd MMM-MicrosoftToDo && npm install
+3. In order to load the MMM-MicrosoftToDo module you will need to add the following configuration to your `config/config.js` file. As `oauth2ClientSecret` you need to provide Client Secret from above, as `oauth2RefreshToken` you set the Refresh Token, as `oauth2ClientId` you set the Client ID and as `listName` you set the exact name of the task list, or leave it blank to show items from the default "Tasks" list.
 ```javascript
 modules: [
   {
@@ -94,15 +95,15 @@ modules: [
       // Optional parameter:  see Planned Tasks Configuration
       plannedTasks: {
         enabled: false
-      }
+      },
       showCheckbox: true, // optional parameter: default value is true and will show a checkbox before each todo list item
       showDueDate: false, // optional parameter: default value is false and will show the todo list items due date if it exists on the todo list item
       dateFormat: 'ddd MMM Do [ - ]', //optional parameter: uses moment date format and the default value is 'ddd MMM Do [ - ]'
-      highlightTagColor: "#E3FF30" // optional parameter: highlight tags (#Tags) in the entry text. value can be a HTML color value
+      highlightTagColor: '#E3FF30', // optional parameter: highlight tags (#Tags) in the entry text. value can be a HTML color value
       hideIfEmpty: false, // optional parameter: default value is false and will show the module also when the todo list is empty
       maxWidth: 450, // optional parameter: max width in pixel, default value is 450
       itemLimit: 200, // optional parameter: limit on the number of items to show from the list, default value is 200
-      orderBy: 'subject', // optional parameter: 'subject' - order results by subject/name, 'dueDate' - order results by due date, default value is unordered
+      orderBy: 'createdDate', // optional parameter: 'createdDate' - order results by creation date, 'dueDate' - order results by due date, default value is unordered, ordering by title is not supported anymore in API version 1
       completeOnClick: true, // optional parameter: default value is false, when set to true complete task when clicking on it
       refreshSeconds: 60, // optional parameter: every how many seconds should the list be updated from the remote service, default value is 60
       fade: true, //optional parameter: default value is false. True will fade the list towards the bottom from the point set in the fadePoint parameter

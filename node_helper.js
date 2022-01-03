@@ -169,7 +169,9 @@ module.exports = NodeHelper.create({
     var promises = listIds.map((listId) => {
       const promiseSelf = self;
       var orderBy =
-        (config.orderBy === "subject" ? "&$orderby=title" : "") +
+        // sorting by subject is not supported anymore in API v1, hence falling back to created time
+        (config.orderBy === "subject" ? "&$orderby=createdDateTime" : "") +
+        (config.orderBy === "createdDate" ? "&$orderby=createdDateTime" : "") +
         (config.orderBy === "dueDate" ? "&$orderby=duedatetime/datetime" : "");
       var filterClause = "status ne 'completed'";
       if (config.plannedTasks.enable) {
