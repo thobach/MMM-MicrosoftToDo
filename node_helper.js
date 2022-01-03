@@ -5,177 +5,271 @@
   therefore we cannot make AJAX calls from the browser without disabling
   webSecurity in Electron.
 */
-var NodeHelper = require('node_helper')
-const request = require('request')
-
+var NodeHelper = require("node_helper");
+const fetch = require("node-fetch");
+const Log = require("logger");
+const { add, formatISO, compareAsc, parseISO } = require("date-fns");
 module.exports = NodeHelper.create({
-
   start: function () {
-    console.log(this.name + ' helper started ...')
+    Log.info(`${this.name} node_helper started ...`);
   },
 
   socketNotificationReceived: function (notification, payload) {
-    if (notification === 'FETCH_DATA') {
-      this.fetchData(payload)
-    } else if (notification === 'COMPLETE_TASK') {
-      this.completeTask(payload.taskId, payload.config)
+    if (notification === "FETCH_DATA") {
+      this.fetchData(payload);
+    } else if (notification === "COMPLETE_TASK") {
+      this.completeTask(payload.listId, payload.taskId, payload.config);
     } else {
-      console.log(this.name + ' - Did not process event: ' + notification)
+      Log.warn(`${this.name} - did not process event: ${notification}`);
     }
   },
 
-  completeTask: function (taskId, config) {
+  completeTask: function (listId, taskId, config) {
     // copy context to be available inside callbacks
-    var self = this
+    const self = this;
 
-    var completeTaskUrl = 'https://graph.microsoft.com/beta/me/outlook/tasks/' + taskId + '/complete'
+    var patchUrl = `https://graph.microsoft.com/v1.0/me/lists/${listId}/tasks/${taskId}`;
 
-    request.post({
-      url: completeTaskUrl,
+    const updateBody = {
+      id: taskId,
+      status: "completed"
+    };
+
+    fetch(patchUrl, {
+      method: "PATCH",
+      body: JSON.stringify(updateBody),
       headers: {
-        Authorization: 'Bearer ' + self.accessToken
+        "Content-Type": "application/json",
+        Authentication: `Bearer ${self.accessToken}`
       }
-    }, function (error, response, body) {
-      if (error) {
-        console.error(self.name + ' - Error while requesting access token:')
-        console.error(error)
-        return
-      }
-
-      if (body && JSON.parse(body).error) {
-        console.error(self.name + ' - Error while completing tasks:')
-        console.error(JSON.parse(body).error)
-        self.sendSocketNotification('COMPLETE_TASK_ERROR', { error: JSON.parse(body).error.code, errorDescription: JSON.parse(body).error.message })
-        return
-      }
-
-      console.log(this.name + ' - Completed task with ID: ' + taskId)
-
-      // update front-end about success to trigger a refresh of the task list
-      self.sendSocketNotification('TASK_COMPLETED_' + config.id)
     })
+      .then(self.checkFetchStatus)
+      .then((response) => response.json())
+      .then(self.checkBodyError)
+      .then((responseJson) => {
+        self.sendSocketNotification(
+          `TASK_COMPLETED_${config.id}`,
+          responseJson
+        );
+      })
+      .error((error) => self.logError(error));
   },
 
   getTodos: function (config) {
     // copy context to be available inside callbacks
-    var self = this
+    const self = this;
 
     // get access token
-    var tokenUrl = 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
-    var refreshToken = config.oauth2RefreshToken
-    var data = {
-      client_id: config.oauth2ClientId,
-      scope: 'offline_access user.read ' + (config.completeOnClick ? 'tasks.readwrite' : 'tasks.read'),
-      refresh_token: refreshToken,
-      grant_type: 'refresh_token',
-      client_secret: config.oauth2ClientSecret
-    }
-    request.post({
-      url: tokenUrl,
-      form: data
-    },
-    function (error, response, body) {
-      if (error) {
-        console.error(self.name + ' - Error while requesting access token:')
-        console.error(error)
-        return
-      }
+    var tokenUrl = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+    var refreshToken = config.oauth2RefreshToken;
+    const form = new URLSearchParams();
+    form.append("client_id", config.oauth2ClientId);
+    form.append(
+      "scope",
+      "offline_access user.read " +
+        (config.completeOnClick ? "tasks.readwrite" : "tasks.read")
+    );
+    form.append("refresh_token", refreshToken);
+    form.append("grant_type", "refresh_token");
+    form.append("client_secret", config.oauth2ClientSecret);
 
-      if (body && JSON.parse(body).error) {
-        console.error(self.name + ' - Error while requesting access token:')
-        console.error(JSON.parse(body))
-
-        self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: JSON.parse(body).error, errorDescription: JSON.parse(body).error_description })
-
-        return
-      }
-
-      const accessTokenJson = JSON.parse(body)
-      var accessToken = accessTokenJson.access_token
-      self.accessToken = accessToken
-
-      // get tasks
-      var _getTodos = function () {
-        var orderBy = (config.orderBy === 'subject' ? '&$orderby=subject' : '') + (config.orderBy === 'dueDate' ? '&$orderby=duedatetime/datetime' : '')
-        var listUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/' + config._listId + '/tasks?$select=subject,status,duedatetime&$top=' + config.itemLimit + '&$filter=status%20ne%20%27completed%27' + orderBy
-
-        request.get({
-          url: listUrl,
-          headers: {
-            Authorization: 'Bearer ' + accessToken
-          }
-        }, function (error, response, body) {
-          if (error) {
-            console.error(self.name + ' - Error while requesting access token:')
-            console.error(error)
-          }
-
-          if (body && JSON.parse(body).error) {
-            console.error(self.name + ' - Error while requesting tasks:')
-            console.error(JSON.parse(body).error)
-
-            self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: JSON.parse(body).error.code, errorDescription: JSON.parse(body).error.message })
-
-            return
-          }
-
-          // send tasks to front-end
-          const tasksJson = JSON.parse(body)
-          self.sendSocketNotification('DATA_FETCHED_' + config.id, tasksJson.value)
-        })
-      }
-
-      // get ID of task folder
-      var taksFoldersUrl = 'https://graph.microsoft.com/beta/me/outlook/taskFolders/?$top=200'
-
-      request.get({
-        url: taksFoldersUrl,
-        headers: {
-          Authorization: 'Bearer ' + accessToken
-        }
-      }, function (error, response, body) {
-        if (error) {
-          console.error(self.name + ' - Error while requesting task folders:')
-          console.error(error)
-
-          self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: 'Error while requesting task folders', errorDescription: error })
-
-          return
-        }
-
-        // parse response from Microsoft
-        var list = JSON.parse(body)
-
-        // if list name was provided, retrieve its ID
-        if (config.listName !== undefined && config.listName !== '') {
-          list.value.forEach(element => element.name === config.listName ? (config._listId = element.id) : '')
-        } else if (config.listId !== undefined && config.listId !== '') {
-          // if list ID was provided copy it to internal list ID config and show deprecation warning
-          config._listId = config.listId
-          console.warn(self.name + ' - Warning, configuration parameter listId is deprecated, please use listName instead, otherwise the module will not work anymore in the future.')
-          // TODO: during the next release uncomment the following line to not show the todo list, but the error message instead
-          // self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, {
-          // error: 'Config param "listId" is deprecated, use "listName" instead',
-          // errorDescription: 'The configuration parameter listId is deprecated, please use listName instead. See https://github.com/thobach/MMM-MicrosoftToDo/blob/master/README.MD#installation' })
-        } else {
-          // otherwise identify the list ID of the default task list first
-          // set listID to default task list "Tasks"
-          list.value.forEach(element => element.isDefaultFolder ? (config._listId = element.id) : '')
-        }
-
-        if (config._listId !== undefined && config._listId !== '') {
-          // based on translated configuration data (listName -> listId), get tasks
-          _getTodos()
-        } else {
-          self.sendSocketNotification('FETCH_INFO_ERROR_' + config.id, { error: '"' + config.listName + '" task folder not found', errorDescription: 'The task folder "' + config.listName + '" could not be found.' })
-          console.error(self.name + ' - Error while requesting task folders: Could not find task folder ID for task folder name "' + config.listName + '", or could not find default folder in case no task folder name was provided.')
-        }
-      } // function callback for task folders
-      )
+    fetch(tokenUrl, {
+      method: "POST",
+      body: form
     })
+      .then(self.checkFetchStatus)
+      .then((response) => response.json())
+      .then(self.checkBodyError)
+      .then((accessTokenJson) => {
+        var accessToken = accessTokenJson.access_token;
+        self.accessToken = accessToken;
+        self.fetchList(accessToken, config);
+      })
+      .catch((error) => {
+        self.logError(error);
+      });
+  },
+  fetchList: function (accessToken, config) {
+    const self = this;
+
+    var filterClause = "";
+    const hasListNameInConfig =
+      config.listName !== undefined && config.listName !== "";
+    // filter by displayName, otherwise, get all the lists
+    if (hasListNameInConfig) {
+      // Get the list ID based on name
+      filterClause = `displayName eq '${config.listName}'`;
+    }
+
+    filterClause = encodeURIComponent(filterClause).replaceAll("'", "%27");
+
+    var filter = "";
+    if (filterClause !== "") {
+      filter = `&$filter=${filterClause}`;
+    }
+
+    // get ID of task folder
+    var getListUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/?$top=200${filter}`;
+    fetch(getListUrl, {
+      method: "get",
+      headers: {
+        Authorization: "Bearer " + accessToken
+      }
+    })
+      .then(self.checkFetchStatus)
+      .then((response) => response.json())
+      .then(self.checkBodyError)
+      .then((responseData) => {
+        var listIds = [];
+        if (config.plannedTasks.enable) {
+          //  Filter out any lists that are in the `includedLists` collection
+          listIds = responseData.value
+            .filter(
+              (list) =>
+                config.plannedTasks.includedLists.findIndex(
+                  (include) => list.displayName.match(include) !== null
+                ) !== -1
+            )
+            .map((list) => list.id);
+        } else if (responseData.value.length > 0) {
+          if (!hasListNameInConfig) {
+            // If there is no list name in the config and it's not showPlannedTasks, get the default list
+            const list = responseData.value.find(
+              (element) => element.wellknownListName === "defaultList"
+            );
+            if (list) {
+              listIds.push(list.id);
+            }
+          } else {
+            listIds.push(responseData.value[0].id);
+          }
+        }
+
+        if (listIds.length > 0) {
+          self.getTasks(accessToken, config, listIds);
+        } else {
+          self.logError({
+            error: `"${config.listName}" task folder not found`,
+            errorDescription: `The task folder "${config.listName}" could not be found.`
+          });
+        }
+      }) // function callback for task folders
+      .catch((error) => self.logError(error));
+  },
+  fetchData: function (config) {
+    this.getTodos(config);
+  },
+  getTasks: function (accessToken, config, listIds) {
+    const self = this;
+    Log.info(
+      `[MMM-MicrosoftToDo] - Retrieving Tasks for ${listIds.length} list(s)`
+    );
+
+    // TODO: Iterate through ALL the lists.  If showplannedtasks, filter out those without
+    var promises = listIds.map((listId) => {
+      const promiseSelf = self;
+      var orderBy =
+        (config.orderBy === "subject" ? "&$orderby=title" : "") +
+        (config.orderBy === "dueDate" ? "&$orderby=duedatetime/datetime" : "");
+      var filterClause = "status ne 'completed'";
+      if (config.plannedTasks.enable) {
+        var pastDate = formatISO(add(Date.now(), config.plannedTasks.duration));
+        filterClause += ` and duedatetime/datetime lt '${pastDate}' and duedatetime/datetime ne null`;
+      }
+
+      filterClause = encodeURIComponent(filterClause).replaceAll("'", "%27");
+      var listUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/${listId}/tasks?$top=${config.itemLimit}&$filter=${filterClause}${orderBy}`;
+      Log.debug(`[MMM-MicrosoftToDo] - Retrieving Tasks ${listUrl}`);
+      return fetch(listUrl, {
+        method: "get",
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
+        .then(promiseSelf.checkFetchStatus)
+        .then((response) => response.json())
+        .then(promiseSelf.checkBodyError)
+        .then((responseData) => {
+          var tasks = [];
+          if (
+            responseData.value !== null &&
+            responseData.value !== undefined &&
+            responseData.value.length > 0
+          ) {
+            tasks = responseData.value.map((element) => {
+              var parsedDate;
+              if (element !== undefined && element.dueDateTime !== undefined) {
+                parsedDate = parseISO(element.dueDateTime.dateTime);
+              }
+              return {
+                id: element.id,
+                title: element.title,
+                dueDateTime: element.dueDateTime,
+                listId: config._listId,
+                parsedDate: parsedDate
+              };
+            });
+          }
+          return tasks;
+        }) // function callback for task folders
+        .catch(promiseSelf.logError);
+    });
+
+    Log.debug(`[MMM-MicrosoftToDo] - waiting on ${promises.length} promises`);
+    Promise.all(promises)
+      .then((taskArray) => {
+        Log.debug(
+          `[MMM-MicrosoftToDo] - processing ${taskArray.length} return values`
+        );
+        var returnTasks = [];
+        taskArray.forEach((element) => {
+          if (element !== null && element !== undefined && element.length > 0) {
+            element.forEach((task) => returnTasks.push(task));
+          }
+        });
+
+        returnTasks.sort(self.taskSortCompare);
+        if (returnTasks.length > config.itemLimit) {
+          returnTasks = returnTasks.slice(0, config.itemLimit - 1);
+        }
+
+        Log.debug(
+          `[MMM-MicrosoftToDo] - returning ${returnTasks.length} tasks`
+        );
+        self.sendSocketNotification(`DATA_FETCHED_${config.id}`, returnTasks);
+      })
+      .catch(self.logError);
+  },
+  taskSortCompare: function (firstTask, secondTask) {
+    if (firstTask.parsedDate === undefined) {
+      return 1;
+    }
+    if (secondTask.parsedDate === undefined) {
+      return -1;
+    }
+    return compareAsc(firstTask.parsedDate, secondTask.parsedDate);
   },
 
-  fetchData: function (config) {
-    this.getTodos(config)
+  checkFetchStatus: function (response) {
+    if (response.ok) {
+      return response;
+    } else {
+      throw Error(response.statusText);
+    }
+  },
+  checkBodyError: function (json) {
+    if (json && json.error) {
+      throw Error(json.error);
+    }
+    return json;
+  },
+  logError: function (error) {
+    const jsonError = JSON.stringify(error);
+
+    if (jsonError) {
+      Log.error(`[MMM-MicrosoftToDo]: ${jsonError}`);
+    } else {
+      Log.error(`[MMM-MicrosoftToDo]: ${error}`);
+    }
   }
-})
+});
