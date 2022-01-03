@@ -92,12 +92,13 @@ modules: [
       oauth2ClientId: '4ef19f40-4892-4905-b999-76041e991f53',
       listName: 'Shopping List', // optional parameter: if not specified displays tasks from default "Tasks" list, if specified will look for a task list with the specified name (exact spelling)
       // Optional parameter:  see Planned Tasks Configuration
-      plannedTasks: { 
+      plannedTasks: {
         enabled: false
       }
       showCheckbox: true, // optional parameter: default value is true and will show a checkbox before each todo list item
       showDueDate: false, // optional parameter: default value is false and will show the todo list items due date if it exists on the todo list item
       dateFormat: 'ddd MMM Do [ - ]', //optional parameter: uses moment date format and the default value is 'ddd MMM Do [ - ]'
+      highlightTagColor: "#E3FF30" // optional parameter: highlight tags (#Tags) in the entry text. value can be a HTML color value
       hideIfEmpty: false, // optional parameter: default value is false and will show the module also when the todo list is empty
       maxWidth: 450, // optional parameter: max width in pixel, default value is 450
       itemLimit: 200, // optional parameter: limit on the number of items to show from the list, default value is 200
@@ -116,7 +117,7 @@ Microsoft ToDo offers a Planned smart list which shows tasks with a due date acr
 When enabled, the `listName` parameter is ignored, and tasks are retrieved from all lists which match the following criteria:
 * Task Status is not equal to `completed`
 * Task DueDate is set
-* Task Due date is less than the current date + the configured duration. 
+* Task Due date is less than the current date + the configured duration.
 
 In other words, if you just enable the Planned Tasks configuration, the default values for `duration` and `includedLists` will take tasks from all lists which are not completed and have a due date less than 2 weeks from today.  That will include any tasks that are overdue.
 
