@@ -114,10 +114,10 @@ Module.register("MMM-MicrosoftToDo", {
           }
           var startingPoint = self.config.itemLimit * self.config.fadePoint;
           var steps = self.config.itemLimit - startingPoint;
-            
-          var currentStep = (itemCounter - startingPoint);
+
+          var currentStep = itemCounter - startingPoint;
           if (itemCounter < self.config.itemLimit) {
-            listItem.style.opacity = 1 - (1 / steps * currentStep);
+            listItem.style.opacity = 1 - (1 / steps) * currentStep;
           } else if (itemCounter === self.config.itemLimit) {
             // Set opacity of last item to 90% of the opacity of the second to last item
             listItem.style.opacity =
