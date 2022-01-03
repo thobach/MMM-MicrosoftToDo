@@ -130,7 +130,7 @@ Module.register("MMM-MicrosoftToDo", {
         var titleTokens = element.title.match(/((#[^\s]+)|(?!\s)[^#]*|\s+)+?/g);
         for (var i = 0; i < titleTokens.length; i++) {
           if (titleTokens[i].startsWith("#")) {
-            var tagNode = document.createElement("span")
+            var tagNode = document.createElement("span");
             tagNode.innerText = titleTokens[i];
             if (self.config.highlightTagColor != null) {
               tagNode.style.color = self.config.highlightTagColor;
