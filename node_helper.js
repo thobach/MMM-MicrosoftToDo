@@ -148,7 +148,7 @@ module.exports = NodeHelper.create({
         if (listIds.length > 0) {
           self.getTasks(accessToken, config, listIds);
         } else {
-          self.logError({
+          self.logErrorObject({
             error: `"${config.listName}" task folder not found`,
             errorDescription: `The task folder "${config.listName}" could not be found.`
           });
@@ -266,12 +266,9 @@ module.exports = NodeHelper.create({
     return json;
   },
   logError: function (error) {
-    const jsonError = JSON.stringify(error);
-
-    if (jsonError) {
-      Log.error(`[MMM-MicrosoftToDo]: ${jsonError}`);
-    } else {
-      Log.error(`[MMM-MicrosoftToDo]: ${error}`);
-    }
+    Log.error(`[MMM-MicrosoftToDo]: ${error}`);
+  },
+  logErrorObject: function (errorObject) {
+    Log.error(`[MMM-MicrosoftToDo]: ${JSON.stringify(errorObject)}`);
   }
 });
