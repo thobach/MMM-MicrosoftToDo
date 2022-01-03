@@ -36,27 +36,27 @@ Module.register('MMM-MicrosoftToDo', {
 
         // checkbox icon is added based on configuration
         if (this.config.showCheckbox) {
-            listItem.appendChild(document.createTextNode("▢ "))
+          listItem.appendChild(document.createTextNode('▢ '))
         }
 
         // display the (previously formatted) due date
-        if (taskDue != '') {
-            listItem.appendChild(document.createTextNode(taskDue))
+        if (taskDue !== '') {
+          listItem.appendChild(document.createTextNode(taskDue))
         }
-        
+
         // extract tags (#Tag) from subject an display them differently
         var subjectTokens = element.subject.match(/((#[^\s]+)|(?!\s)[^#]*|\s+)+?/g)
-        for (var i=0; i < subjectTokens.length; i++) {
-            if (subjectTokens[i].startsWith("#")) {
-                var tagNode =document.createElement('span')
-                tagNode.innerText = subjectTokens[i]
-                if (self.config.highlightTagColor != null) {
-                    tagNode.style.color = self.config.highlightTagColor
-                }
-                listItem.appendChild(tagNode)
-            } else {
-                listItem.appendChild(document.createTextNode(subjectTokens[i]))
+        for (var i = 0; i < subjectTokens.length; i++) {
+          if (subjectTokens[i].startsWith('#')) {
+            var tagNode = document.createElement('span')
+            tagNode.innerText = subjectTokens[i]
+            if (self.config.highlightTagColor != null) {
+              tagNode.style.color = self.config.highlightTagColor
             }
+            listItem.appendChild(tagNode)
+          } else {
+            listItem.appendChild(document.createTextNode(subjectTokens[i]))
+          }
         }
 
         // complete task when clicked on it
