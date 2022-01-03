@@ -26,7 +26,8 @@ Module.register("MMM-MicrosoftToDo", {
         weeks: 2
       }
     },
-    colorDueDate: false
+    colorDueDate: false,
+    highlightTagColor: null
   },
 
   getStyles: function () {
@@ -125,9 +126,23 @@ Module.register("MMM-MicrosoftToDo", {
           }
         }
 
-        listSpan.append(document.createTextNode(element.title));
+        // extract tags (#Tag) from subject an display them differently
+        var titleTokens = element.title.match(/((#[^\s]+)|(?!\s)[^#]*|\s+)+?/g);
+        for (var i = 0; i < titleTokens.length; i++) {
+          if (titleTokens[i].startsWith("#")) {
+            var tagNode = document.createElement("span");
+            tagNode.innerText = titleTokens[i];
+            if (self.config.highlightTagColor != null) {
+              tagNode.style.color = self.config.highlightTagColor;
+            }
+            listItem.appendChild(tagNode);
+          } else {
+            listItem.appendChild(document.createTextNode(titleTokens[i]));
+          }
+        }
 
         listItem.appendChild(listSpan);
+
         // complete task when clicked on it
         if (self.config.completeOnClick) {
           listItem.onclick = function () {
