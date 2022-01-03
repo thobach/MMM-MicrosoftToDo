@@ -135,9 +135,9 @@ Module.register("MMM-MicrosoftToDo", {
             if (self.config.highlightTagColor != null) {
               tagNode.style.color = self.config.highlightTagColor;
             }
-            listItem.appendChild(tagNode);
+            listSpan.append(tagNode);
           } else {
-            listItem.appendChild(document.createTextNode(titleTokens[i]));
+            listSpan.append(document.createTextNode(titleTokens[i]));
           }
         }
 
