@@ -167,7 +167,7 @@ module.exports = NodeHelper.create({
       `[MMM-MicrosoftToDo] - Retrieving Tasks for ${listIds.length} list(s)`
     );
 
-    const limit = RateLimit(5);
+    const limit = RateLimit(2);
 
     // TODO: Iterate through ALL the lists.  If showplannedtasks, filter out those without
     var promises = listIds.map(async (listId) => {
