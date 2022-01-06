@@ -127,21 +127,24 @@ Module.register("MMM-MicrosoftToDo", {
         }
 
         // extract tags (#Tag) from subject an display them differently
-        var titleTokens = element.title.match(/((#[^\s]+)|(?!\s)[^#]*|\s+)+?/g);
+        if (element.title) {
+          var titleTokens = element.title.match(
+            /((#[^\s]+)|(?!\s)[^#]*|\s+)+?/g
+          );
 
-        titleTokens.forEach((token) => {
-          if (token.startsWith("#")) {
-            var tagNode = document.createElement("span");
-            tagNode.innerText = token;
-            if (self.config.highlightTagColor != null) {
-              tagNode.style.color = self.config.highlightTagColor;
+          titleTokens.forEach((token) => {
+            if (token.startsWith("#")) {
+              var tagNode = document.createElement("span");
+              tagNode.innerText = token;
+              if (self.config.highlightTagColor != null) {
+                tagNode.style.color = self.config.highlightTagColor;
+              }
+              listSpan.append(tagNode);
+            } else {
+              listSpan.append(document.createTextNode(token));
             }
-            listSpan.append(tagNode);
-          } else {
-            listSpan.append(document.createTextNode(token));
-          }
-        });
-
+          });
+        }
         listItem.appendChild(listSpan);
 
         // complete task when clicked on it
