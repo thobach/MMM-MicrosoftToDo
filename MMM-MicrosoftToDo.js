@@ -66,8 +66,11 @@ Module.register("MMM-MicrosoftToDo", {
           // converting time zone to browser provided timezone and formatting time according to configuration
           var taskDueDate = moment
             .utc(taskDue[0])
-            .tz(Intl.DateTimeFormat().resolvedOptions().timeZone)
-            .add(1, "d"); // Due date in Task defaults to midnight on the day, so add a day to shift due date to midnight the next day
+            .tz(Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+          if (self.config.useRelativeDate) {
+            taskDueDate = taskDueDate.add(1, "d"); // Due date in Task defaults to midnight on the day, so add a day to shift due date to midnight the next day
+          }
 
           var classNames = ["mmm-task-due-date"];
           if (self.config.colorDueDate) {
