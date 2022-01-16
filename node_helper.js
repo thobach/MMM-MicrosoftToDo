@@ -212,6 +212,7 @@ module.exports = NodeHelper.create({
                 id: element.id,
                 title: element.title,
                 dueDateTime: element.dueDateTime,
+                recurrence: element.recurrence,
                 listId: config._listId,
                 parsedDate: parsedDate
               };

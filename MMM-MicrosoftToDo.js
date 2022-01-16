@@ -100,6 +100,16 @@ Module.register("MMM-MicrosoftToDo", {
           taskText.className = classNames.join(" ");
 
           listSpan.append(taskText);
+
+          // add icon to recurring items
+          if (element.recurrence != null) {
+            var recurringIcon = document.createElement("i");
+            recurringIcon.className = "fas fa-redo";
+            recurringIcon.style = "margin-right:5px; font-weight: normal;";
+            recurringIcon.innerText = " - ";
+            listSpan.append(recurringIcon);
+          }
+
         }
 
         var listItem = document.createElement("li");
