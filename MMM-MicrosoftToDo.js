@@ -66,8 +66,11 @@ Module.register("MMM-MicrosoftToDo", {
           // converting time zone to browser provided timezone and formatting time according to configuration
           var taskDueDate = moment
             .utc(taskDue[0])
-            .tz(Intl.DateTimeFormat().resolvedOptions().timeZone)
-            .add(1, "d"); // Due date in Task defaults to midnight on the day, so add a day to shift due date to midnight the next day
+            .tz(Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+          if (self.config.useRelativeDate) {
+            taskDueDate = taskDueDate.add(1, "d"); // Due date in Task defaults to midnight on the day, so add a day to shift due date to midnight the next day
+          }
 
           var classNames = ["mmm-task-due-date"];
           if (self.config.colorDueDate) {
@@ -127,21 +130,24 @@ Module.register("MMM-MicrosoftToDo", {
         }
 
         // extract tags (#Tag) from subject an display them differently
-        var titleTokens = element.title.match(/((#[^\s]+)|(?!\s)[^#]*|\s+)+?/g);
+        if (element.title) {
+          var titleTokens = element.title.match(
+            /((#[^\s]+)|(?!\s)[^#]*|\s+)+?/g
+          );
 
-        titleTokens.forEach((token) => {
-          if (token.startsWith("#")) {
-            var tagNode = document.createElement("span");
-            tagNode.innerText = token;
-            if (self.config.highlightTagColor != null) {
-              tagNode.style.color = self.config.highlightTagColor;
+          titleTokens.forEach((token) => {
+            if (token.startsWith("#")) {
+              var tagNode = document.createElement("span");
+              tagNode.innerText = token;
+              if (self.config.highlightTagColor != null) {
+                tagNode.style.color = self.config.highlightTagColor;
+              }
+              listSpan.append(tagNode);
+            } else {
+              listSpan.append(document.createTextNode(token));
             }
-            listSpan.append(tagNode);
-          } else {
-            listSpan.append(document.createTextNode(token));
-          }
-        });
-
+          });
+        }
         listItem.appendChild(listSpan);
 
         // complete task when clicked on it

@@ -9,6 +9,8 @@ var NodeHelper = require("node_helper");
 const fetch = require("node-fetch");
 const Log = require("logger");
 const { add, formatISO, compareAsc, parseISO } = require("date-fns");
+const { RateLimit } = require("async-sema");
+
 module.exports = NodeHelper.create({
   start: function () {
     Log.info(`${this.name} node_helper started ...`);
@@ -165,8 +167,10 @@ module.exports = NodeHelper.create({
       `[MMM-MicrosoftToDo] - Retrieving Tasks for ${listIds.length} list(s)`
     );
 
+    const limit = RateLimit(2);
+
     // TODO: Iterate through ALL the lists.  If showplannedtasks, filter out those without
-    var promises = listIds.map((listId) => {
+    var promises = listIds.map(async (listId) => {
       const promiseSelf = self;
       var orderBy =
         // sorting by subject is not supported anymore in API v1, hence falling back to created time
@@ -182,6 +186,7 @@ module.exports = NodeHelper.create({
       filterClause = encodeURIComponent(filterClause).replaceAll("'", "%27");
       var listUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/${listId}/tasks?$top=${config.itemLimit}&$filter=${filterClause}${orderBy}`;
       Log.debug(`[MMM-MicrosoftToDo] - Retrieving Tasks ${listUrl}`);
+      await limit();
       return fetch(listUrl, {
         method: "get",
         headers: {
