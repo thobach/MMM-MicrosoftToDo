@@ -99,6 +99,7 @@ modules: [
       showCheckbox: true, // optional parameter: default value is true and will show a checkbox before each todo list item
       showDueDate: false, // optional parameter: default value is false and will show the todo list items due date if it exists on the todo list item
       dateFormat: 'ddd MMM Do [ - ]', //optional parameter: uses moment date format and the default value is 'ddd MMM Do [ - ]'
+      useRelativeDate: true, // optional parameter: default value is false and will display absolute due date, if set to false will show time in hours/days until item is due (midnight of due date)
       highlightTagColor: '#E3FF30', // optional parameter: highlight tags (#Tags) in the entry text. value can be a HTML color value
       hideIfEmpty: false, // optional parameter: default value is false and will show the module also when the todo list is empty
       maxWidth: 450, // optional parameter: max width in pixel, default value is 450
