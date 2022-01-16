@@ -109,7 +109,6 @@ Module.register("MMM-MicrosoftToDo", {
             recurringIcon.innerText = " - ";
             listSpan.append(recurringIcon);
           }
-
         }
 
         var listItem = document.createElement("li");
