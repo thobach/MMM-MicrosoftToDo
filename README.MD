@@ -46,7 +46,7 @@ Note: This setup does not work under an Azure Germany (with T-Systems as data tr
 1. Go to "Certificates & secrets"
 2. Click "+ New client secret"
 3. Set as "Description": "Magic Mirror"
-4. Select as "Expires": "Never"
+4. Select as "Expires": "24 Months"
 5. Click "Add"
 6. Copy the "Value", e.g. `1Q25lsZTKEDf4RWBKVUbKjnaVuXytPaB`, it will be the `client secret` you need later
 
