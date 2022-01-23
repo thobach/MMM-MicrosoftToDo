@@ -27,24 +27,30 @@ module.exports = NodeHelper.create({
   },
 
   completeTask: function (listId, taskId, config) {
+    Log.info(
+      `${this.name} - completing task '${taskId}' from list '${listId}'`
+    );
+
     // copy context to be available inside callbacks
     const self = this;
 
-    var patchUrl = `https://graph.microsoft.com/v1.0/me/lists/${listId}/tasks/${taskId}`;
+    var patchUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/${listId}/tasks/${taskId}`;
 
     const updateBody = {
       id: taskId,
       status: "completed"
     };
 
-    fetch(patchUrl, {
+    const request = {
       method: "PATCH",
       body: JSON.stringify(updateBody),
       headers: {
         "Content-Type": "application/json",
-        Authentication: `Bearer ${self.accessToken}`
+        Authorization: `Bearer ${self.accessToken}`
       }
-    })
+    };
+
+    fetch(patchUrl, request)
       .then(self.checkFetchStatus)
       .then((response) => response.json())
       .then(self.checkBodyError)
@@ -54,7 +60,10 @@ module.exports = NodeHelper.create({
           responseJson
         );
       })
-      .error((error) => self.logError(error));
+      .catch((error) => {
+        Log.error(`[MMM-MicrosoftToDo]: completeTask: ${patchUrl}`);
+        self.logError(error);
+      });
   },
 
   getTodos: function (config) {
@@ -88,6 +97,9 @@ module.exports = NodeHelper.create({
         self.fetchList(accessToken, config);
       })
       .catch((error) => {
+        Log.error(
+          `[MMM-MicrosoftToDo]: getTodos / get access token: ${tokenUrl}`
+        );
         self.logError(error);
       });
   },
@@ -109,6 +121,8 @@ module.exports = NodeHelper.create({
     if (filterClause !== "") {
       filter = `&$filter=${filterClause}`;
     }
+
+    Log.info(`${this.name} - getting list using filter '${filter}'`);
 
     // get ID of task folder
     var getListUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/?$top=200${filter}`;
@@ -156,16 +170,17 @@ module.exports = NodeHelper.create({
           });
         }
       }) // function callback for task folders
-      .catch((error) => self.logError(error));
+      .catch((error) => {
+        Log.error(`[MMM-MicrosoftToDo]: fetchList ${getListUrl}`);
+        self.logError(error);
+      });
   },
   fetchData: function (config) {
     this.getTodos(config);
   },
   getTasks: function (accessToken, config, listIds) {
     const self = this;
-    Log.info(
-      `[MMM-MicrosoftToDo] - Retrieving Tasks for ${listIds.length} list(s)`
-    );
+    Log.info(`${this.name} - getting tasks for ${listIds.length} list(s)`);
 
     const limit = RateLimit(2);
 
@@ -185,7 +200,7 @@ module.exports = NodeHelper.create({
 
       filterClause = encodeURIComponent(filterClause).replaceAll("'", "%27");
       var listUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/${listId}/tasks?$top=${config.itemLimit}&$filter=${filterClause}${orderBy}`;
-      Log.debug(`[MMM-MicrosoftToDo] - Retrieving Tasks ${listUrl}`);
+      Log.info(`${this.name} - getting tasks for list '${listId}'`);
       await limit();
       return fetch(listUrl, {
         method: "get",
@@ -213,7 +228,7 @@ module.exports = NodeHelper.create({
                 title: element.title,
                 dueDateTime: element.dueDateTime,
                 recurrence: element.recurrence,
-                listId: config._listId,
+                listId: listId,
                 parsedDate: parsedDate
               };
             });
@@ -262,12 +277,22 @@ module.exports = NodeHelper.create({
     if (response.ok) {
       return response;
     } else {
-      throw Error(response.statusText);
+      Log.error(response);
+      throw Error(
+        `checkFetchStatus failed with status '${
+          response.statusText
+        }' ${JSON.stringify(response)}`
+      );
     }
   },
   checkBodyError: function (json) {
     if (json && json.error) {
-      throw Error(json.error);
+      Log.error(json);
+      throw Error(
+        `checkBodyError failed with status '${json.error}' ${JSON.stringify(
+          json
+        )}`
+      );
     }
     return json;
   },
