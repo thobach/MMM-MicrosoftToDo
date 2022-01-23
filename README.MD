@@ -56,7 +56,8 @@ Create authorization code by opening the following URL in your browser (but repl
 https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access%20user.read%20tasks.readwrite%20tasks.read&redirect_uri=https://localhost:1234&response_mode=query&state=12345
 ```
 1. Login and click on "Yes" and wait to be redirected
-2. Copy the `code` parameter from the URL in the browser, e.g. `M30cd0dff-af91-d061-8755-ffb3b328aa03` from
+2. Your browser will be redirected to https://localhost:1234 and probably show an error message, this is expected
+3. Copy the `code` parameter from the URL in the browser, e.g. `M30cd0dff-af91-d061-8755-ffb3b328aa03` from
 ```
 https://localhost:1234/?code=M30cd0dff-af91-d061-8755-ffb3b328aa03&state=12345
 ```
@@ -64,7 +65,7 @@ https://localhost:1234/?code=M30cd0dff-af91-d061-8755-ffb3b328aa03&state=12345
 ### Refresh Token Generation (Refresh Token)
 Generate refresh token to allow the module to retrieve your task list going forward
 1. Open Terminal app
-2. Run the following command with your `client_id` (Client ID), `code` (Code) and `client_secret` (Client Secret) parameters (don't forget the trailing `'`)
+2. Run the following command with your `client_id` (Client ID), `code` (Code) and `client_secret` (Client Secret) parameters (don't forget the trailing `"`)
 ```bash
 curl -X POST https://login.microsoftonline.com/common/oauth2/v2.0/token -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=authorization_code&client_id=4ef19f40-4892-4905-b999-76041e991f53&scope=offline_access%20user.read%20tasks.readwrite%20tasks.read&code=M30cd0dff-af91-d061-8755-ffb3b328aa03&redirect_uri=https%3A%2F%2Flocalhost%3A1234&client_secret=1Q25lsZTKEDf4RWBKVUbKjnaVuXytPaB"
 ```
