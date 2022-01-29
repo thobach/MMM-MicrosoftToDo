@@ -95,7 +95,7 @@ modules: [
       listName: 'Shopping List', // optional parameter: if not specified displays tasks from default "Tasks" list, if specified will look for a task list with the specified name (exact spelling)
       // Optional parameter:  see Planned Tasks Configuration
       plannedTasks: {
-        enabled: false
+        enable: false
       },
       showCheckbox: true, // optional parameter: default value is true and will show a checkbox before each todo list item
       showDueDate: false, // optional parameter: default value is false and will show the todo list items due date if it exists on the todo list item
