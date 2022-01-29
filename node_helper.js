@@ -8,7 +8,7 @@
 var NodeHelper = require("node_helper");
 const fetch = require("node-fetch");
 const Log = require("logger");
-const { add, formatISO, compareAsc, parseISO } = require("date-fns");
+const { add, formatISO9075, compareAsc, parseISO } = require("date-fns");
 const { RateLimit } = require("async-sema");
 
 module.exports = NodeHelper.create({
@@ -122,7 +122,7 @@ module.exports = NodeHelper.create({
       filter = `&$filter=${filterClause}`;
     }
 
-    Log.info(`${this.name} - getting list using filter '${filter}'`);
+    Log.debug(`${this.name} - getting list using filter '${filter}'`);
 
     // get ID of task folder
     var getListUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/?$top=200${filter}`;
@@ -139,6 +139,9 @@ module.exports = NodeHelper.create({
         var listIds = [];
         if (config.plannedTasks.enable) {
           //  Filter out any lists that are in the `includedLists` collection
+          Log.debug(
+            `${this.name} - applying filter '${config.plannedTasks.includedLists}' to ${responseData.value.length} lists`
+          );
           listIds = responseData.value
             .filter(
               (list) =>
@@ -149,7 +152,8 @@ module.exports = NodeHelper.create({
             .map((list) => list.id);
         } else if (responseData.value.length > 0) {
           if (!hasListNameInConfig) {
-            // If there is no list name in the config and it's not showPlannedTasks, get the default list
+            Log.debug(`${this.name} - using default list`);
+            // If there is no list name in the config and it's not plannedTasks, get the default list
             const list = responseData.value.find(
               (element) => element.wellknownListName === "defaultList"
             );
@@ -157,6 +161,9 @@ module.exports = NodeHelper.create({
               listIds.push(list.id);
             }
           } else {
+            Log.debug(
+              `${this.name} - using lists that match filter '${filter}'`
+            );
             listIds.push(responseData.value[0].id);
           }
         }
@@ -180,11 +187,11 @@ module.exports = NodeHelper.create({
   },
   getTasks: function (accessToken, config, listIds) {
     const self = this;
-    Log.info(`${this.name} - getting tasks for ${listIds.length} list(s)`);
+    Log.debug(`${this.name} - getting tasks for ${listIds.length} list(s)`);
 
     const limit = RateLimit(2);
 
-    // TODO: Iterate through ALL the lists.  If showplannedtasks, filter out those without
+    // TODO: Iterate through ALL the lists.  If plannedTasks, filter out those without
     var promises = listIds.map(async (listId) => {
       const promiseSelf = self;
       var orderBy =
@@ -194,13 +201,17 @@ module.exports = NodeHelper.create({
         (config.orderBy === "dueDate" ? "&$orderby=duedatetime/datetime" : "");
       var filterClause = "status ne 'completed'";
       if (config.plannedTasks.enable) {
-        var pastDate = formatISO(add(Date.now(), config.plannedTasks.duration));
+        // need to ignore time zone, as the API expects a date time without
+        // time zone
+        var pastDate = formatISO9075(
+          add(Date.now(), config.plannedTasks.duration)
+        );
         filterClause += ` and duedatetime/datetime lt '${pastDate}' and duedatetime/datetime ne null`;
       }
 
       filterClause = encodeURIComponent(filterClause).replaceAll("'", "%27");
       var listUrl = `https://graph.microsoft.com/v1.0/me/todo/lists/${listId}/tasks?$top=${config.itemLimit}&$filter=${filterClause}${orderBy}`;
-      Log.info(`${this.name} - getting tasks for list '${listId}'`);
+      Log.debug(`${this.name} - getting tasks for list '${listId}'`);
       await limit();
       return fetch(listUrl, {
         method: "get",
