@@ -92,7 +92,7 @@ modules: [
       oauth2ClientSecret: '1Q25ls%3FTKEDf4RWBKVUbKjnaVu%3DytP.%5B',
       oauth2RefreshToken: 'MCVDmtyumC8ZdlGxrkMwCdur4FbPh7GHjy1gOaOHEA8*c5tTI4oIcJAHU8AflLZMLmcCRWNEa7nMkag2hbipYbZ3QgL9JB1G6Hc*JZY9oA5j46Cq79b6BDx8mivTVen0r*39h2hw9pngKS7MGXjKc9efwayQ7UhsFoCJ2wdhLJzv5gTR2EozgcsKsxHODj!1fV8a1sqVqJ!sU*CBLTMsm0twI2hZqsCkPoSWaMIS5kKFAq7bCsfNaumS11TZYni3XjVwuyHn4DEqfLGjHuSNo1TYRifcG422MdG6bYt7tBxWiw5dlq2iIEMl6O*N2sLWU7W0Ns2*oQbcXIFxRsZ8cHP*6M9dn*9Axg8WbtERj!*jHTfC!Ax6IILXrHDJkdAXgh01PVH!huztVrgd0UC6E4R4zJSOa4ytOKWfQcL9h0NdA',
       oauth2ClientId: '4ef19f40-4892-4905-b999-76041e991f53',
-      listName: 'Shopping List', // optional parameter: if not specified displays tasks from default "Tasks" list, if specified will look for a task list with the specified name (exact spelling)
+      listName: 'Shopping List', // optional parameter: if not specified displays tasks from default "Tasks" list, if specified will look for a task list with the specified name (exact spelling), don't specify if you want to make use of the 'includedLists' configuration property of the 'plannedTasks' configuration.
       // Optional parameter:  see Planned Tasks Configuration
       plannedTasks: {
         enable: false
@@ -118,7 +118,7 @@ modules: [
 ## Planned Tasks Configuration
 Microsoft ToDo offers a Planned smart list which shows tasks with a due date across all lists.  You can use the `plannedTasks` configuration section to mimic this functionality in MMM-MicrosoftToDo.
 
-When enabled, the `listName` parameter is ignored, and tasks are retrieved from all lists which match the following criteria:
+When enabled, make sure the `listName` parameter is not set. Tasks are then retrieved from all lists which match the following criteria:
 * Task Status is not equal to `completed`
 * Task DueDate is set
 * Task Due date is less than the current date + the configured duration.

@@ -21,9 +21,12 @@ Module.register("MMM-MicrosoftToDo", {
     useRelativeDate: false,
     plannedTasks: {
       enable: false,
-      includedLists: [".*"],
+      includedLists: [".*"], // this is ignored as a default value as the whole
+      // 'plannedTasks' object is replaced when property 'enable' is set to true
       duration: {
-        weeks: 2
+        weeks: 2 // this is ignored as a default value as the whole
+        // 'plannedTasks' object is replaced when property 'enable' is set to
+        // true
       }
     },
     colorDueDate: false,

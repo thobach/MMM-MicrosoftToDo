@@ -138,6 +138,12 @@ module.exports = NodeHelper.create({
       .then((responseData) => {
         var listIds = [];
         if (config.plannedTasks.enable) {
+          // default values from MMM-MicrosoftToDo.js are not considered as
+          // the 'plannedTasks' configuration is handled by a nested object,
+          // therefore setting default values here again
+          if (!config.plannedTasks.includedLists) {
+            config.plannedTasks.includedLists = [".*"];
+          }
           //  Filter out any lists that are in the `includedLists` collection
           Log.debug(
             `${this.name} - applying filter '${config.plannedTasks.includedLists}' to ${responseData.value.length} lists`
@@ -201,6 +207,12 @@ module.exports = NodeHelper.create({
         (config.orderBy === "dueDate" ? "&$orderby=duedatetime/datetime" : "");
       var filterClause = "status ne 'completed'";
       if (config.plannedTasks.enable) {
+        // default values from MMM-MicrosoftToDo.js are not considered as
+        // the 'plannedTasks' configuration is handled by a nested object,
+        // therefore setting default values here again
+        if (!config.plannedTasks.duration) {
+          config.plannedTasks.duration = { weeks: 2 };
+        }
         // need to ignore time zone, as the API expects a date time without
         // time zone
         var pastDate = formatISO9075(
