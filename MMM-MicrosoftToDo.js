@@ -34,7 +34,7 @@ Module.register("MMM-MicrosoftToDo", {
   },
 
   getStyles: function () {
-    return ["MMM-MicrosoftToDo.css"];
+    return ["MMM-MicrosoftToDo.css", "font-awesome.css"];
   },
 
   // Override dom generator.
@@ -106,10 +106,9 @@ Module.register("MMM-MicrosoftToDo", {
 
           // add icon to recurring items
           if (element.recurrence != null) {
-            var recurringIcon = document.createElement("img");
-            recurringIcon.src =
-              "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABmJLR0QA/wD/AP+gvaeTAAAA+klEQVQokZXRPyvFYRjG8ft3Oj+LhInBgEWZ8BIUKVEmZaYog82uLBZegZJk8QKUDAavQYrOIoujpGNxysfgOTp+df64prvu+3s/1309EV0Kizho1ezBBi5RwWOqt1FFDQNFaAJ3fvSKa1zhxV/tNEMjeMYHNpE39fYK4D2yRvMCdcwWXPQlF58FeL7x2heO2wRTxjjmsIWpwFrastBtwhERpYgYSvXTf8Fqqns7DWMUR+gN5Fj+Tao9eJjOGitlWVaPiJuIOMN0B7YWESdZllUam4bxlj4+L05jBfutbMxgN1k/xTkmsZTsPaDc7o4ct3jHKgaxjv7muW8rFTwlzTxjZAAAAABJRU5ErkJggg==";
-            recurringIcon.style = "margin-right:5px; font-weight: normal;";
+            var recurringIcon = document.createElement("i");
+            recurringIcon.className = "fas fa-sync";
+            recurringIcon.style = "margin-right:5px;";
             recurringIcon.innerText = " - ";
             listSpan.append(recurringIcon);
           }
