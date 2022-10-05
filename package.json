@@ -30,7 +30,7 @@
   "homepage": "https://github.com/thobach/MMM-MicrosoftToDo#readme",
   "dependencies": {
     "async-sema": "^3.1.1",
-    "date-fns": "^2.29.2"
+    "date-fns": "^2.29.3"
   },
   "devDependencies": {
     "eslint": "^7.24.0",
