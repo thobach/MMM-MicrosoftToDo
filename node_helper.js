@@ -204,6 +204,7 @@ module.exports = NodeHelper.create({
         // sorting by subject is not supported anymore in API v1, hence falling back to created time
         (config.orderBy === "subject" ? "&$orderby=createdDateTime" : "") +
         (config.orderBy === "createdDate" ? "&$orderby=createdDateTime" : "") +
+        (config.orderBy === "importance" ? "&$orderby=importance desc" : "") +
         (config.orderBy === "dueDate" ? "&$orderby=duedatetime/datetime" : "");
       var filterClause = "status ne 'completed'";
       if (config.plannedTasks.enable) {

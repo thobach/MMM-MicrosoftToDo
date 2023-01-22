@@ -105,7 +105,7 @@ modules: [
       hideIfEmpty: false, // optional parameter: default value is false and will show the module also when the todo list is empty
       maxWidth: 450, // optional parameter: max width in pixel, default value is 450
       itemLimit: 200, // optional parameter: limit on the number of items to show from the list, default value is 200
-      orderBy: 'createdDate', // optional parameter: 'createdDate' - order results by creation date, 'dueDate' - order results by due date, default value is unordered, ordering by title is not supported anymore in API version 1
+      orderBy: 'createdDate', // optional parameter: 'createdDate' - order results by creation date, 'dueDate' - order results by due date, 'importance' - order result by priority (e.g. starred), default value is unordered, ordering by title is not supported anymore in API version 1
       completeOnClick: true, // optional parameter: default value is false, when set to true complete task when clicking on it
       refreshSeconds: 60, // optional parameter: every how many seconds should the list be updated from the remote service, default value is 60
       fade: true, //optional parameter: default value is false. True will fade the list towards the bottom from the point set in the fadePoint parameter
