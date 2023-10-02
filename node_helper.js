@@ -6,13 +6,19 @@
   webSecurity in Electron.
 */
 var NodeHelper = require("node_helper");
-const fetch = require("node-fetch");
 const Log = require("logger");
 const { add, formatISO9075, compareAsc, parseISO } = require("date-fns");
 const { RateLimit } = require("async-sema");
 
 module.exports = NodeHelper.create({
-  start: function () {
+  async initialize() {
+    const fetchModule = await import('node-fetch');
+    this.fetch = fetchModule.default;
+    // You can call any other initialization methods here if needed.
+  },
+  
+  async start() {
+    await this.initialize();
     Log.info(`${this.name} node_helper started ...`);
   },
 
