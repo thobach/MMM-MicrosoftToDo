@@ -6,7 +6,6 @@
   webSecurity in Electron.
 */
 var NodeHelper = require("node_helper");
-const fetch = require("node-fetch");
 const Log = require("logger");
 const { add, formatISO9075, compareAsc, parseISO } = require("date-fns");
 const { RateLimit } = require("async-sema");
