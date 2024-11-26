@@ -19,6 +19,7 @@ Module.register("MMM-MicrosoftToDo", {
     fade: false,
     fadePoint: 0.5,
     useRelativeDate: false,
+    markRecurringItems: true,
     plannedTasks: {
       enable: false,
       includedLists: [".*"], // this is ignored as a default value as the whole
@@ -105,7 +106,7 @@ Module.register("MMM-MicrosoftToDo", {
           listSpan.append(taskText);
 
           // add icon to recurring items
-          if (element.recurrence != null) {
+          if (self.config.markRecurringItems && element.recurrence != null) {
             var recurringIcon = document.createElement("i");
             recurringIcon.className = "fas fa-sync";
             recurringIcon.style = "margin-right:5px;";
