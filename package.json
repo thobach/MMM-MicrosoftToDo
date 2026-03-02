@@ -29,8 +29,10 @@
   },
   "homepage": "https://github.com/thobach/MMM-MicrosoftToDo#readme",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.2.0",
     "async-sema": "^3.1.1",
-    "date-fns": "^2.30.0"
+    "date-fns": "^2.30.0",
+    "moment-timezone": "^0.6.0"
   },
   "devDependencies": {
     "eslint": "^7.24.0",
