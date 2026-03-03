@@ -110,8 +110,9 @@ module.exports = NodeHelper.create({
       config.listName !== undefined && config.listName !== "";
     // filter by displayName, otherwise, get all the lists
     if (hasListNameInConfig) {
-      // Get the list ID based on name
-      filterClause = `displayName eq '${config.listName}'`;
+      // OData requires single quotes to be escaped as '' (e.g. "Todo's" → "Todo''s")
+      const escapedName = config.listName.replace(/'/g, "''");
+      filterClause = `displayName eq '${escapedName}'`;
     }
 
     filterClause = encodeURIComponent(filterClause).replaceAll("'", "%27");
