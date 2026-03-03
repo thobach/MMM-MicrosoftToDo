@@ -34,14 +34,8 @@ Module.register("MMM-MicrosoftToDo", {
   },
 
   getStyles: function () {
-    return [
-      "MMM-MicrosoftToDo.css",
-      this.file("node_modules/@fortawesome/fontawesome-free/css/all.min.css")
-    ];
+      return ["MMM-MicrosoftToDo.css", "font-awesome.css"];
   },
- 	getScripts: function () {
-		return [this.file("node_modules/moment-timezone/builds/moment-timezone-with-data.min.js")];
-	},
 
   // Override dom generator.
   getDom: function () {
