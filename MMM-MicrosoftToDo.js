@@ -34,7 +34,7 @@ Module.register("MMM-MicrosoftToDo", {
   },
 
   getStyles: function () {
-      return ["MMM-MicrosoftToDo.css", "font-awesome.css"];
+    return ["MMM-MicrosoftToDo.css", "font-awesome.css"];
   },
 
   // Override dom generator.
